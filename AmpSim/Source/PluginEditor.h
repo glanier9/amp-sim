@@ -10,6 +10,8 @@
 
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
+#include "AmpKnob.h"
+#include "SelectionBox.h"
 
 //==============================================================================
 /**
@@ -25,6 +27,11 @@ public:
     void resized() override;
 
 private:
+    
+    /* Helper Functions */
+    std::vector<juce::Component*> getComps();
+    std::vector<juce::Component*> getKnobs();
+    juce::Point<float> getInitialWindowSize () const { return juce::Point<float>(1000, 600); }
 
     /* Font assets */
     juce::Font ampSectionFont{ 12.0f };
@@ -64,28 +71,28 @@ private:
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> gateReleaseAtt;
     
     /* Gain slider */
-    juce::Slider preGainSlider;
-    juce::Label preGainLabel;
+    AmpKnobRotarySlider preGainSlider;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> preGainAtt;
+    juce::Label preGainLabel;
 
     /* Filter sliders */
-    juce::Slider bassSlider;
+    AmpKnobRotarySlider bassSlider;
     juce::Label bassLabel;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> bassAtt;
-    juce::Slider midSlider;
+    AmpKnobRotarySlider midSlider;
     juce::Label midLabel;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> midAtt;
-    juce::Slider trebleSlider;
+    AmpKnobRotarySlider trebleSlider;
     juce::Label trebleLabel;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> trebleAtt;
 
     /* Waveshaper combo box */
-    juce::ComboBox waveShaperCombo;
+    SelectionBox waveShaperCombo;
     juce::Label waveBoxLabel;
     std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment> waveShaperAtt;
     
     /* Master volume slider */
-    juce::Slider masterVolSlider;
+    AmpKnobRotarySlider masterVolSlider;
     juce::Label masterVolLabel;
     juce::Font masterVolFont;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> masterVolAtt;
@@ -110,7 +117,7 @@ private:
 
     /* Convolution combo box */
     juce::Label convoBoxLabel;
-    juce::ComboBox convolutionCombo;
+    SelectionBox convolutionCombo;
     std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment> convolutionAtt;
     void convolutionChanged();
 

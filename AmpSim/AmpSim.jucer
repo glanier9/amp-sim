@@ -3,9 +3,15 @@
 <JUCERPROJECT id="Xzs9g1" name="AmpSim" projectType="audioplug" useAppConfig="0"
               addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1"
               pluginFormats="buildStandalone,buildVST3" version="0.1.0" companyName="GAEamps"
-              companyEmail="glanier9@gatech.edu" pluginName="GAE AmpSim" pluginDesc="Guitar amplifier simulator made for 4803 GAE.">
+              companyEmail="glanier9@gatech.edu" pluginName="GAE AmpSim" pluginDesc="Guitar amplifier simulator made for 4803 GAE."
+              pluginAAXCategory="8192">
   <MAINGROUP id="AREUk6" name="AmpSim">
     <GROUP id="{0725B4A8-E60E-3EA1-2114-8D88951412ED}" name="Source">
+      <FILE id="dLGDbk" name="SelectionBox.cpp" compile="1" resource="0"
+            file="Source/SelectionBox.cpp"/>
+      <FILE id="ALjiBG" name="SelectionBox.h" compile="0" resource="0" file="Source/SelectionBox.h"/>
+      <FILE id="RTcA2G" name="AmpKnob.cpp" compile="1" resource="0" file="Source/AmpKnob.cpp"/>
+      <FILE id="ycIQUG" name="AmpKnob.h" compile="0" resource="0" file="Source/AmpKnob.h"/>
       <FILE id="QEWP4h" name="PluginProcessor.cpp" compile="1" resource="0"
             file="Source/PluginProcessor.cpp"/>
       <FILE id="qwMesg" name="PluginProcessor.h" compile="0" resource="0"
