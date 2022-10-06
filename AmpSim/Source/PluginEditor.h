@@ -47,76 +47,54 @@ private:
         styleItalic,
         numberOfStyles
     };
-
-    /* Section labels */
-    juce::Label ampSectionLabel{ {}, "Amplifier" };
-    juce::Label gateSectionLabel;
-    juce::Label reverbSectionLabel;
-
-    /* Noise gate assets */
-    juce::ToggleButton noiseGateToggle;
-    juce::Label gateBypassedLabel;
-    std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> noiseGateToggleAtt;
-    juce::Slider gateThresholdSlider;
-    juce::Label gateThresholdLabel;
-    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> gateThresholdAtt;
-    juce::Slider gateRatioSlider;
-    juce::Label gateRatioLabel;
-    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> gateRatioAtt;
-    juce::Slider gateAttackSlider;
-    juce::Label gateAttackLabel;
-    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> gateAttackAtt;
-    juce::Slider gateReleaseSlider;
-    juce::Label gateReleaseLabel;
-    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> gateReleaseAtt;
     
     /* Gain slider */
     AmpKnobRotarySlider preGainSlider;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> preGainAtt;
-    juce::Label preGainLabel;
 
     /* Filter sliders */
     AmpKnobRotarySlider bassSlider;
-    juce::Label bassLabel;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> bassAtt;
     AmpKnobRotarySlider midSlider;
-    juce::Label midLabel;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> midAtt;
     AmpKnobRotarySlider trebleSlider;
-    juce::Label trebleLabel;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> trebleAtt;
+
+    /* Noise gate assets */
+    juce::ToggleButton noiseGateToggle;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> noiseGateToggleAtt;
+    juce::Slider gateThresholdSlider;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> gateThresholdAtt;
+    juce::Slider gateRatioSlider;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> gateRatioAtt;
+    juce::Slider gateAttackSlider;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> gateAttackAtt;
+    juce::Slider gateReleaseSlider;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> gateReleaseAtt;
 
     /* Waveshaper combo box */
     SelectionBox waveShaperCombo;
-    juce::Label waveBoxLabel;
     std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment> waveShaperAtt;
     
     /* Master volume slider */
     AmpKnobRotarySlider masterVolSlider;
-    juce::Label masterVolLabel;
     juce::Font masterVolFont;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> masterVolAtt;
     void waveshaperChanged();
     
     /* Reverb */
     juce::ToggleButton reverbButton;
-    juce::Label reverbBypassedLabel;
     std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> reverbButtonAtt;
     juce::Slider reverbRoomSize;
-    juce::Label reverbRoomLabel;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> reverbRoomAtt;
     juce::Slider reverbDamping;
-    juce::Label reverbDampingLabel;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> reverbDampingAtt;
     juce::Slider reverbMix;
-    juce::Label reverbMixLabel;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> reverbMixAtt;
     juce::Slider reverbWidth;
-    juce::Label reverbWidthLabel;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> reverbWidthAtt;
 
     /* Convolution combo box */
-    juce::Label convoBoxLabel;
     SelectionBox convolutionCombo;
     std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment> convolutionAtt;
     void convolutionChanged();
