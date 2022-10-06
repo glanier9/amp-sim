@@ -19,7 +19,8 @@ AmpSimAudioProcessorEditor::AmpSimAudioProcessorEditor (AmpSimAudioProcessor& p)
     midSlider.labels.add({0.f, "Mid"});
     trebleSlider.labels.add({0.f, "Treble"});
     masterVolSlider.labels.add({0.f, "Volume"});
-    convolutionCombo.outsideLabel.label = "Cabinet";
+    waveShaperCombo.lnf.outsideLabels.add({0.f, "Amp Model"});
+    convolutionCombo.lnf.outsideLabels.add({0.f, "Cabinet"});
 //    /*
 //
 //        Amp section Setup
@@ -154,16 +155,19 @@ AmpSimAudioProcessorEditor::AmpSimAudioProcessorEditor (AmpSimAudioProcessor& p)
 //
 //    */
     addAndMakeVisible(waveShaperCombo);
-    waveShaperCombo.addItem("Squeaky Clean", Clean);
+//    waveShaperCombo.addItem("Squeaky Clean", Clean);
     waveShaperCombo.addSectionHeading("Low Gain");
-    waveShaperCombo.addItem("Asinine", Asinine);
-    waveShaperCombo.addItem("Reptile", Reptile);
-    waveShaperCombo.addItem("Geeky", Geeky);
-    waveShaperCombo.addItem("Smol Cronch", SmolCronch);
+    waveShaperCombo.addItemList(LowGainAmps, 1);
+    waveShaperCombo.addSeparator();
+//    waveShaperCombo.addItem("Asinine", Asinine);
+//    waveShaperCombo.addItem("Reptile", Reptile);
+//    waveShaperCombo.addItem("Geeky", Geeky);
+//    waveShaperCombo.addItem("Smol Cronch", SmolCronch);
     waveShaperCombo.addSectionHeading("High Gain");
-    waveShaperCombo.addItem("Fat Man", FatMan);
-    waveShaperCombo.addItem("Circle 7", Circle7);
-    waveShaperCombo.addItem("Fork in Toaster", ForkInToaster);
+    waveShaperCombo.addItemList(HighGainAmps, sizeof(LowGainAmps) + 1);
+//    waveShaperCombo.addItem("Fat Man", FatMan);
+//    waveShaperCombo.addItem("Circle 7", Circle7);
+//    waveShaperCombo.addItem("Fork in Toaster", ForkInToaster);
     waveShaperCombo.onChange = [this] { waveshaperChanged(); };
     addAndMakeVisible(waveBoxLabel);    // Waveshaper label
 //    waveBoxLabel.setFont(comboBoxFont);

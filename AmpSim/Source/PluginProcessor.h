@@ -83,6 +83,20 @@ enum AmpNames
     ForkInToaster,
     AmpCount    // Used to calculate number of amps
 };
+const juce::StringArray LowGainAmps
+{
+    "Squeaky Clean",
+    "Asinine",
+    "Reptile",
+    "Geeky",
+    "SmolCronch"
+};
+const juce::StringArray HighGainAmps
+{
+    "FatMan",
+    "Circle7",
+    "ForkInToaster"
+};
 
 /* Effects loop setup */
 using EffectsChain = juce::dsp::ProcessorChain
