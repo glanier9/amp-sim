@@ -62,7 +62,7 @@ void AmpKnobRotarySlider::paint(juce::Graphics &g)
     Path path;
     auto knobCenterRadius = (center.getX() - sliderBounds.getX())/8;
     auto startDist = center.getY() - (center.getY() - sliderBounds.getHeight()/2 - 8);
-    auto endDist = startDist + 20;
+    auto endDist = startDist + getSliderBounds().getWidth()/5;
     auto angle = juce::MathConstants<float>::twoPi;
     auto lineCount = 12;
     Rectangle<float> textBox;
@@ -116,7 +116,6 @@ void AmpKnobRotarySlider::paint(juce::Graphics &g)
     textBox.setSize(g.getCurrentFont().getStringWidth(labels[0].label), g.getCurrentFont().getHeight());
     textBox.setCentre(center.getX(), center.getY() + endDist);
     g.drawFittedText(labels[0].label, textBox.toNearestInt(), juce::Justification::centred, 1);
-    
 }
 
 juce::Rectangle<int> AmpKnobRotarySlider::getSliderBounds() const
@@ -124,7 +123,7 @@ juce::Rectangle<int> AmpKnobRotarySlider::getSliderBounds() const
     auto bounds = getLocalBounds();
     juce::Rectangle<int> sliderBounds;
     auto size = juce::jmin(bounds.getWidth(), bounds.getHeight());
-    auto sizeOffset = 100;
+    auto sizeOffset = size/2.f;
     size -= sizeOffset; // Shrink box from border
     
     sliderBounds.setSize(size, size);

@@ -21,7 +21,7 @@ void SelectionLookAndFeel::drawComboBox(juce::Graphics& g,
 {
     using namespace juce;
     auto cornerSize = box.findParentComponentOfClass<ChoicePropertyComponent>() != nullptr ? 0.0f : 3.0f;
-    Rectangle<int> boxBounds ((width - (width * widthOffset))/2, (height - (height * heightOffset)),
+    Rectangle<int> boxBounds ((width - (width * widthOffset))/2, (height - (height * heightOffset)*1.8f),
                               width * widthOffset, height*heightOffset);
     Path path;
 
@@ -39,7 +39,7 @@ void SelectionLookAndFeel::drawComboBox(juce::Graphics& g,
     
     /* Arrow signifying dropdown */
     g.setColour (box.findColour (ComboBox::arrowColourId).withAlpha ((box.isEnabled() ? 0.9f : 0.2f)));
-    Rectangle<int> arrowZone (width * widthOffset - 10, 10, 20, height); // Left, top, right, bottom
+    Rectangle<int> arrowZone (width * widthOffset - 10, -9, 20, height); // Left, top, right, bottom
     path.startNewSubPath ((float) arrowZone.getX() + 3.0f, (float) arrowZone.getCentreY() - 2.0f);
     path.lineTo ((float) arrowZone.getCentreX(), (float) arrowZone.getCentreY() + 3.0f);
     path.lineTo ((float) arrowZone.getRight() - 3.0f, (float) arrowZone.getCentreY() - 2.0f);
@@ -52,7 +52,7 @@ void SelectionLookAndFeel::drawComboBox(juce::Graphics& g,
     auto center = boxBounds.getCentre();
     g.setColour(Colour(255u, 255u, 255u));
     textBox.setSize(g.getCurrentFont().getStringWidth(outsideLabels[0].label), g.getCurrentFont().getHeight());
-    textBox.setCentre(center.getX(), center.getY() - boxBounds.getY() - 5);
+    textBox.setCentre(center.getX(), center.getY() + boxBounds.getY() * 5);
     g.drawFittedText(outsideLabels[0].label, textBox.toNearestInt(), juce::Justification::centred, 1);
 }
 
@@ -61,7 +61,7 @@ void SelectionLookAndFeel::drawComboBox(juce::Graphics& g,
  */
 void SelectionLookAndFeel::positionComboBoxText (juce::ComboBox& box, juce::Label& label)
 {
-    label.setBounds ((box.getWidth() - (box.getWidth() * widthOffset)) + 2, 11,
+    label.setBounds ((box.getWidth() - (box.getWidth() * widthOffset)) + 2, -9,
                      box.getWidth() - 30,
                      box.getHeight() - 2);
     label.setFont (getComboBoxFont (box));

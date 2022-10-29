@@ -13,7 +13,7 @@
 #include<JuceHeader.h>
 
 const float widthOffset = 0.8f;
-const float heightOffset = 0.6f;
+const float heightOffset = 0.5f;
 
 struct SelectionLookAndFeel : juce::LookAndFeel_V4
 {
@@ -50,4 +50,7 @@ struct SelectionBox : juce::ComboBox
     
     /* Public Variables */
     SelectionLookAndFeel lnf;
+    
+private:
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SelectionBox)
 };

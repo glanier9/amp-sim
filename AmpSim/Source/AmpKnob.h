@@ -52,4 +52,6 @@ struct AmpKnobRotarySlider : juce::Slider
     
 private:
     AmpKnobLookAndFeel lnf;
+    
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AmpKnobRotarySlider)
 };

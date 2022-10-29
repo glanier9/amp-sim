@@ -21,6 +21,8 @@ AmpSimAudioProcessorEditor::AmpSimAudioProcessorEditor (AmpSimAudioProcessor& p)
     masterVolSlider.labels.add({0.f, "Volume"});
     waveShaperCombo.lnf.outsideLabels.add({0.f, "Amp Model"});
     convolutionCombo.lnf.outsideLabels.add({0.f, "Cabinet"});
+    noiseGate.labels.add({0.f, "Noise Gate"});
+    reverb.labels.add({0.f, "Reverb"});
     
     /* Amp section sliders */
     preGainAtt = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>
@@ -56,38 +58,37 @@ AmpSimAudioProcessorEditor::AmpSimAudioProcessorEditor (AmpSimAudioProcessor& p)
         (audioProcessor.apvts, "CONVOLUTION", convolutionCombo);
     
     /* Noise Gate */
-    gateAttackAtt = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>
-        (audioProcessor.apvts, "GATEATT", gateAttackSlider);
-    gateReleaseAtt = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>
-        (audioProcessor.apvts, "GATEREL", gateReleaseSlider);
-    gateThresholdAtt = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>
-        (audioProcessor.apvts, "GATETHRESH", gateThresholdSlider);
-    // Toggle button TODO
-//    noiseGateToggleAtt = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>
-//        (audioProcessor.apvts, "GATE", noiseGateToggle);
+    noiseGateThresholdAtt = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>
+        (audioProcessor.apvts, "GATETHRESH", noiseGate.knob);
+    noiseGateToggleAtt = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>
+        (audioProcessor.apvts, "GATE", noiseGate.button);
     
     /* Reverb */
-    reverbWidthAtt = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>
-        (audioProcessor.apvts, "VERBWIDTH", reverbWidth);
-    reverbMixAtt = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>
-        (audioProcessor.apvts, "VERBMIX", reverbMix);
-    reverbDampingAtt = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>
-        (audioProcessor.apvts, "VERBDAMPING", reverbDamping);
-    reverbRoomAtt = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>
-        (audioProcessor.apvts, "VERBROOM", reverbRoomSize);
+//    reverbWidthAtt = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>
+//        (audioProcessor.apvts, "VERBWIDTH", reverbWidth);
+    reverbLevelAtt = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>
+        (audioProcessor.apvts, "VERBMIX", reverb.knob);
+//    reverbDampingAtt = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>
+//        (audioProcessor.apvts, "VERBDAMPING", reverbDamping);
+//    reverbRoomAtt = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>
+//        (audioProcessor.apvts, "VERBROOM", reverbRoomSize);
     // Toggle Button TODO
 //    addAndMakeVisible(reverbButton);
 //    addAndMakeVisible(reverbBypassedLabel);
 //    reverbBypassedLabel.setFont(bypassedFont);
 //    reverbBypassedLabel.setText("Bypassed:", juce::dontSendNotification);
 //    reverbBypassedLabel.attachToComponent(&reverbButton, true);
-//    reverbButtonAtt = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>
-//        (audioProcessor.apvts, "REVERB", reverbButton);
+    reverbToggleAtt = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>
+        (audioProcessor.apvts, "REVERB", reverb.button);
     
     /* Effect 1 */
+    fxLabel1.setFont(bypassedFont);
+    fxLabel1.setText("Effect 1", juce::dontSendNotification);
     // TODO
     
     /* Effect 2 */
+    fxLabel2.setFont(bypassedFont);
+    fxLabel2.setText("Effect 2", juce::dontSendNotification);
     // TODO
 
     /* Generate all components */
@@ -121,9 +122,10 @@ void AmpSimAudioProcessorEditor::resized()
     
     /* Divide window into different sections */
     auto ampArea = windowBounds.removeFromBottom(windowBounds.getHeight()/3.f);
-    auto effectArea1 = windowBounds.removeFromLeft(windowBounds.getWidth()/5.f);
-    auto effectArea2 = windowBounds.removeFromRight(windowBounds.getWidth()/4.f);
+    auto fxArea1 = windowBounds.removeFromLeft(windowBounds.getWidth()/5.f);
+    auto fxArea2 = windowBounds.removeFromRight(windowBounds.getWidth()/4.f);
     auto comboArea = windowBounds.removeFromBottom(windowBounds.getHeight()/7.f);
+    auto singleKnobFxArea = windowBounds.removeFromBottom(windowBounds.getHeight()/3.f);
     
     /* Amp slider section */
     preGainSlider.setBounds(ampArea.removeFromLeft(ampArea.getWidth()/5.f));
@@ -137,15 +139,20 @@ void AmpSimAudioProcessorEditor::resized()
     convolutionCombo.setBounds(comboArea.removeFromLeft(comboArea.getWidth()));
     
     /* Noise gate section */
-    // TODO
+//    noiseGateToggle.setBounds(singleKnobFxArea.removeFromLeft(singleKnobFxArea.getWidth()/10.f));
+//    gateThresholdSlider.setBounds(singleKnobFxArea.removeFromLeft(singleKnobFxArea.getWidth()*(4.f/9.f)));
+    noiseGate.setBounds(singleKnobFxArea.removeFromLeft(singleKnobFxArea.getWidth()/2.f));
     
     /* Reverb section */
-    // TODO
+//    reverbButton.setBounds(singleKnobFxArea.removeFromLeft(singleKnobFxArea.getWidth()/5));
+    reverb.setBounds(singleKnobFxArea);
     
     /* Effect 1 section */
+    fxLabel1.setBounds(fxArea1.removeFromTop(fxArea1.getHeight()/10.f));
     // TODO
     
     /* Effect 2 section */
+    fxLabel2.setBounds(fxArea2.removeFromTop(fxArea2.getHeight()/10.f));
     // TODO
     
 }
@@ -211,6 +218,16 @@ std::vector<juce::Component*> AmpSimAudioProcessorEditor::getComps()
         
         /* Combo Boxes */
         &waveShaperCombo,
-        &convolutionCombo
+        &convolutionCombo,
+        
+        /* FX sections with multiple components */
+        &noiseGate,
+        &reverb,
+        
+        /* Fx 1 */
+        &fxLabel1,
+        
+        /* Fx 2 */
+        &fxLabel2
     };
 }

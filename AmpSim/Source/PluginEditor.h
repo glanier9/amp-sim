@@ -12,6 +12,8 @@
 #include "PluginProcessor.h"
 #include "AmpKnob.h"
 #include "SelectionBox.h"
+#include "FxKnob1.h"
+#include "KnobWithToggle.h"
 
 //==============================================================================
 /**
@@ -33,6 +35,10 @@ private:
     std::vector<juce::Component*> getKnobs();
     juce::Point<float> getInitialWindowSize () const { return juce::Point<float>(1000, 600); }
 
+    /* Section Labels */
+    juce::Label fxLabel1;
+    juce::Label fxLabel2;
+    
     /* Font assets */
     juce::Font ampSectionFont{ 12.0f };
     juce::Font ampSliderFont{ 16.0f };
@@ -61,16 +67,9 @@ private:
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> trebleAtt;
 
     /* Noise gate assets */
-    juce::ToggleButton noiseGateToggle;
+    KnobWithToggle noiseGate;
     std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> noiseGateToggleAtt;
-    juce::Slider gateThresholdSlider;
-    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> gateThresholdAtt;
-    juce::Slider gateRatioSlider;
-    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> gateRatioAtt;
-    juce::Slider gateAttackSlider;
-    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> gateAttackAtt;
-    juce::Slider gateReleaseSlider;
-    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> gateReleaseAtt;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> noiseGateThresholdAtt;
 
     /* Waveshaper combo box */
     SelectionBox waveShaperCombo;
@@ -83,16 +82,9 @@ private:
     void waveshaperChanged();
     
     /* Reverb */
-    juce::ToggleButton reverbButton;
-    std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> reverbButtonAtt;
-    juce::Slider reverbRoomSize;
-    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> reverbRoomAtt;
-    juce::Slider reverbDamping;
-    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> reverbDampingAtt;
-    juce::Slider reverbMix;
-    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> reverbMixAtt;
-    juce::Slider reverbWidth;
-    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> reverbWidthAtt;
+    KnobWithToggle reverb;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> reverbToggleAtt;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> reverbLevelAtt;
 
     /* Convolution combo box */
     SelectionBox convolutionCombo;
