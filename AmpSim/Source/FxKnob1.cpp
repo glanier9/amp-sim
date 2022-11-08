@@ -28,11 +28,11 @@ void FxKnob1LookAndFeel::drawRotarySlider(juce::Graphics &g,
     g.fillEllipse(bounds);
     
     /* Knob border */
-    g.setColour(Colour(255u, 193u, 110u));
+    g.setColour(Colour(0u, 150u, 255u));
     g.drawEllipse(bounds, (bounds.getX() - center.getX())/15);
     
     /* Bounds for rotating indicator */
-    g.setColour(Colour(255u, 193u, 110u));
+    g.setColour(Colour(0u, 150u, 255u));
     rect.setLeft(center.getX() - bounds.getWidth()/20);
     rect.setRight(center.getX() + bounds.getWidth()/20);
     rect.setTop(bounds.getY() - 1);
@@ -63,13 +63,13 @@ void FxKnob1::paint (juce::Graphics& g)
     auto knobCenterRadius = (center.getX() - sliderBounds.getX())/8;
     auto startDist = center.getY() - (center.getY() - sliderBounds.getHeight()/2 - 8);
     auto endDist = startDist + getSliderBounds().getWidth()/5;
-    auto angle = juce::MathConstants<float>::twoPi;
-    auto lineCount = 12;
+//    auto angle = juce::MathConstants<float>::twoPi;
+//    auto lineCount = 12;
     Rectangle<float> textBox;
     
     /* Bounds for area with slider and all assets*/
-    g.setColour(Colours::black);
-    g.drawRect(getLocalBounds());   // Local bounds
+//    g.setColour(Colours::black);
+//    g.drawRect(getLocalBounds());   // Local bounds
     
     /* Generate knob */
     getLookAndFeel().drawRotarySlider(g,
@@ -91,24 +91,24 @@ void FxKnob1::paint (juce::Graphics& g)
     g.fillPath(path);
     
     /* Lines outside the knob */
-    g.setColour(Colour(255u, 255u, 255u));
-    std::vector<Line<float>> lines(lineCount);
-    for (int i = 0; i < lineCount; i++)
-    {
-        if (i == 9)
-        {
-            angle += juce::MathConstants<float>::pi/6;
-            continue;
-        }
-        
-        lines[i].setStart(center.getX() + startDist*cos(angle),
-                          center.getY() - startDist*sin(angle));
-        lines[i].setEnd(center.getX() + endDist*cos(angle),
-                        center.getY() - endDist*sin(angle));
-        
-        g.drawLine(lines[i], 2);
-        angle += juce::MathConstants<float>::pi/6;
-    }
+//    g.setColour(Colour(255u, 255u, 255u));
+//    std::vector<Line<float>> lines(lineCount);
+//    for (int i = 0; i < lineCount; i++)
+//    {
+//        if (i == 9)
+//        {
+//            angle += juce::MathConstants<float>::pi/6;
+//            continue;
+//        }
+//
+//        lines[i].setStart(center.getX() + startDist*cos(angle),
+//                          center.getY() - startDist*sin(angle));
+//        lines[i].setEnd(center.getX() + endDist*cos(angle),
+//                        center.getY() - endDist*sin(angle));
+//
+//        g.drawLine(lines[i], 2);
+//        angle += juce::MathConstants<float>::pi/6;
+//    }
     
     /* Label below knob */
     g.setColour(Colour(255u, 255u, 255u));

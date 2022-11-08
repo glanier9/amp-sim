@@ -12,8 +12,9 @@
 #include "PluginProcessor.h"
 #include "AmpKnob.h"
 #include "SelectionBox.h"
-#include "FxKnob1.h"
 #include "KnobWithToggle.h"
+#include "EffectModule.h"
+#include "AmpImage.h"
 
 //==============================================================================
 /**
@@ -85,6 +86,12 @@ private:
     KnobWithToggle reverb;
     std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> reverbToggleAtt;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> reverbLevelAtt;
+    
+    /* Effect 1 */
+    EffectModule effect1;
+    
+    /* Effect 2 */
+    EffectModule effect2;
 
     /* Convolution combo box */
     SelectionBox convolutionCombo;
@@ -93,6 +100,9 @@ private:
 
     /* Referenced audio processor */
     AmpSimAudioProcessor& audioProcessor;
+    
+    /* Image */
+    AmpImage image;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AmpSimAudioProcessorEditor)
 };

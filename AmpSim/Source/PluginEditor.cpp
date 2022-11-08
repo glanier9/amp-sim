@@ -8,6 +8,7 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include "BinaryData.h"
 
 //==============================================================================
 AmpSimAudioProcessorEditor::AmpSimAudioProcessorEditor (AmpSimAudioProcessor& p)
@@ -82,14 +83,17 @@ AmpSimAudioProcessorEditor::AmpSimAudioProcessorEditor (AmpSimAudioProcessor& p)
         (audioProcessor.apvts, "REVERB", reverb.button);
     
     /* Effect 1 */
-    fxLabel1.setFont(bypassedFont);
-    fxLabel1.setText("Effect 1", juce::dontSendNotification);
+//    fxLabel1.setFont(bypassedFont);
+//    fxLabel1.setText("Effect 1", juce::dontSendNotification);
     // TODO
     
     /* Effect 2 */
-    fxLabel2.setFont(bypassedFont);
-    fxLabel2.setText("Effect 2", juce::dontSendNotification);
+//    fxLabel2.setFont(bypassedFont);
+//    fxLabel2.setText("Effect 2", juce::dontSendNotification);
     // TODO
+    
+    /* Image */
+//    image = juce::ImageCache::getFromMemory(BinaryData::capybara_jpeg, BinaryData::capybara_jpegSize);
 
     /* Generate all components */
     for( auto* comp : getComps() )
@@ -126,6 +130,7 @@ void AmpSimAudioProcessorEditor::resized()
     auto fxArea2 = windowBounds.removeFromRight(windowBounds.getWidth()/4.f);
     auto comboArea = windowBounds.removeFromBottom(windowBounds.getHeight()/7.f);
     auto singleKnobFxArea = windowBounds.removeFromBottom(windowBounds.getHeight()/3.f);
+    auto imageArea = windowBounds;
     
     /* Amp slider section */
     preGainSlider.setBounds(ampArea.removeFromLeft(ampArea.getWidth()/5.f));
@@ -148,13 +153,15 @@ void AmpSimAudioProcessorEditor::resized()
     reverb.setBounds(singleKnobFxArea);
     
     /* Effect 1 section */
-    fxLabel1.setBounds(fxArea1.removeFromTop(fxArea1.getHeight()/10.f));
+    effect1.setBounds(fxArea1);
     // TODO
     
     /* Effect 2 section */
-    fxLabel2.setBounds(fxArea2.removeFromTop(fxArea2.getHeight()/10.f));
+    effect2.setBounds(fxArea2);
     // TODO
     
+    /* Image */
+    image.setBounds(imageArea);
 }
 
 /* 
@@ -225,9 +232,12 @@ std::vector<juce::Component*> AmpSimAudioProcessorEditor::getComps()
         &reverb,
         
         /* Fx 1 */
-        &fxLabel1,
+        &effect1,
         
         /* Fx 2 */
-        &fxLabel2
+        &effect2,
+        
+        /* Image */
+        &image
     };
 }
