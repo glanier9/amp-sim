@@ -65,35 +65,19 @@ AmpSimAudioProcessorEditor::AmpSimAudioProcessorEditor (AmpSimAudioProcessor& p)
         (audioProcessor.apvts, "GATE", noiseGate.button);
     
     /* Reverb */
-//    reverbWidthAtt = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>
-//        (audioProcessor.apvts, "VERBWIDTH", reverbWidth);
     reverbLevelAtt = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>
         (audioProcessor.apvts, "VERBMIX", reverb.knob);
-//    reverbDampingAtt = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>
-//        (audioProcessor.apvts, "VERBDAMPING", reverbDamping);
-//    reverbRoomAtt = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>
-//        (audioProcessor.apvts, "VERBROOM", reverbRoomSize);
-    // Toggle Button TODO
-//    addAndMakeVisible(reverbButton);
-//    addAndMakeVisible(reverbBypassedLabel);
-//    reverbBypassedLabel.setFont(bypassedFont);
-//    reverbBypassedLabel.setText("Bypassed:", juce::dontSendNotification);
-//    reverbBypassedLabel.attachToComponent(&reverbButton, true);
     reverbToggleAtt = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>
         (audioProcessor.apvts, "REVERB", reverb.button);
     
     /* Effect 1 */
-//    fxLabel1.setFont(bypassedFont);
-//    fxLabel1.setText("Effect 1", juce::dontSendNotification);
     // TODO
     
     /* Effect 2 */
-//    fxLabel2.setFont(bypassedFont);
-//    fxLabel2.setText("Effect 2", juce::dontSendNotification);
     // TODO
     
     /* Image */
-//    image = juce::ImageCache::getFromMemory(BinaryData::capybara_jpeg, BinaryData::capybara_jpegSize);
+    // TODO
 
     /* Generate all components */
     for( auto* comp : getComps() )
@@ -144,12 +128,9 @@ void AmpSimAudioProcessorEditor::resized()
     convolutionCombo.setBounds(comboArea.removeFromLeft(comboArea.getWidth()));
     
     /* Noise gate section */
-//    noiseGateToggle.setBounds(singleKnobFxArea.removeFromLeft(singleKnobFxArea.getWidth()/10.f));
-//    gateThresholdSlider.setBounds(singleKnobFxArea.removeFromLeft(singleKnobFxArea.getWidth()*(4.f/9.f)));
     noiseGate.setBounds(singleKnobFxArea.removeFromLeft(singleKnobFxArea.getWidth()/2.f));
     
     /* Reverb section */
-//    reverbButton.setBounds(singleKnobFxArea.removeFromLeft(singleKnobFxArea.getWidth()/5));
     reverb.setBounds(singleKnobFxArea);
     
     /* Effect 1 section */
@@ -189,7 +170,6 @@ void AmpSimAudioProcessorEditor::waveshaperChanged()
     default: 
         break;
     }
-
     //waveBoxLabel.setFont(waveBoxFont);
 }
 void AmpSimAudioProcessorEditor::convolutionChanged()
@@ -208,7 +188,6 @@ void AmpSimAudioProcessorEditor::convolutionChanged()
     default:
         break;
     }
-
     //convoBoxLabel.setFont(convoBoxFont);
 }
 

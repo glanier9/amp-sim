@@ -8,6 +8,7 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include "BinaryData.h"
 
 //==============================================================================
 AmpSimAudioProcessor::AmpSimAudioProcessor()
@@ -31,21 +32,21 @@ AmpSimAudioProcessor::AmpSimAudioProcessor()
     /* Set up file system  for cabinets */
     // These are currently the same, but I left in just to show how changes can be made
     // between platforms.
-    #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
-        rootDir = juce::File::getSpecialLocation(juce::File::globalApplicationsDirectory);
-        numTries = 0;
-        while (!rootDir.getChildFile("AmpSim").exists() && numTries++ < 40)
-        {
-            rootDir = rootDir.getParentDirectory();
-        }
-    #elif __APPLE__
-        rootDir = juce::File::getSpecialLocation(juce::File::globalApplicationsDirectory);
-        numTries = 0;
-        while (!rootDir.getChildFile("AmpSim").exists() && numTries++ < 40)
-        {
-            rootDir = rootDir.getParentDirectory();
-        }
-    #endif
+//    #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+//        rootDir = juce::File::getSpecialLocation(juce::File::globalApplicationsDirectory);
+//        numTries = 0;
+//        while (!rootDir.getChildFile("AmpSim").exists() && numTries++ < 40)
+//        {
+//            rootDir = rootDir.getParentDirectory();
+//        }
+//    #elif __APPLE__
+//        rootDir = juce::File::getSpecialLocation(juce::File::globalApplicationsDirectory);
+//        numTries = 0;
+//        while (!rootDir.getChildFile("AmpSim").exists() && numTries++ < 40)
+//        {
+//            rootDir = rootDir.getParentDirectory();
+//        }
+//    #endif
     
 }
 
@@ -644,33 +645,28 @@ void AmpSimAudioProcessor::updateConvolution(float cabinetSelect)
     {
     case 1:
         /* Guitar amp cabinet */
-        leftCabinet.loadImpulseResponse(rootDir.getChildFile("AmpSim").
-            getChildFile("Cabinets").
-            getChildFile("guitar_amp.wav"),
-            juce::dsp::Convolution::Stereo::yes,
-            juce::dsp::Convolution::Trim::no,
-            1024);
-        rightCabinet.loadImpulseResponse(rootDir.getChildFile("AmpSim").
-            getChildFile("Cabinets").
-            getChildFile("guitar_amp.wav"),
-            juce::dsp::Convolution::Stereo::yes,
-            juce::dsp::Convolution::Trim::no,
-            1024);
+        leftCabinet.loadImpulseResponse(BinaryData::guitar_amp_wav,
+                                        BinaryData::guitar_amp_wavSize,
+                                        juce::dsp::Convolution::Stereo::yes,
+                                        juce::dsp::Convolution::Trim::no,
+                                        1024);
+        rightCabinet.loadImpulseResponse(BinaryData::guitar_amp_wav,
+                                        BinaryData::guitar_amp_wavSize,
+                                        juce::dsp::Convolution::Stereo::yes,
+                                        juce::dsp::Convolution::Trim::no,
+                                        1024);
         break;
     case 2:
-        /* Cassette recorder cabinet */
-        leftCabinet.loadImpulseResponse(rootDir.getChildFile("AmpSim").
-            getChildFile("Cabinets").
-            getChildFile("cassette_recorder.wav"),
-            juce::dsp::Convolution::Stereo::yes,
-            juce::dsp::Convolution::Trim::no,
-            1024);
-        rightCabinet.loadImpulseResponse(rootDir.getChildFile("AmpSim").
-            getChildFile("Cabinets").
-            getChildFile("cassette_recorder.wav"),
-            juce::dsp::Convolution::Stereo::yes,
-            juce::dsp::Convolution::Trim::no,
-            1024);
+        leftCabinet.loadImpulseResponse(BinaryData::cassette_recorder_wav,
+                                        BinaryData::cassette_recorder_wavSize,
+                                        juce::dsp::Convolution::Stereo::yes,
+                                        juce::dsp::Convolution::Trim::no,
+                                        1024);
+        rightCabinet.loadImpulseResponse(BinaryData::cassette_recorder_wav,
+                                        BinaryData::cassette_recorder_wavSize,
+                                        juce::dsp::Convolution::Stereo::yes,
+                                        juce::dsp::Convolution::Trim::no,
+                                        1024);
         break;
     }
 }

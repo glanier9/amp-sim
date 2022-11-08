@@ -29,9 +29,6 @@ void EffectModule::paint (juce::Graphics& g)
     auto localBounds = getLocalBounds();
     juce::Rectangle<float> textBox;
     
-    /* Background Fill */
-//    g.fillAll (getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId)); // clear the background
-    
     /* Area border */
     g.setColour (juce::Colours::black);
     g.drawRect (localBounds, 1);   // draw an outline around the component
@@ -56,5 +53,4 @@ void EffectModule::resized()
     knob2.setBounds(localBounds.removeFromTop(localBounds.getHeight()/3.f));
     knob3.setBounds(localBounds.removeFromTop(localBounds.getHeight()/2.f));
     knob4.setBounds(localBounds.removeFromTop(localBounds.getHeight()/1.f));
-    
 }
