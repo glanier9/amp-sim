@@ -34,12 +34,14 @@
       <FILE id="S4Yqj7" name="Switch.h" compile="0" resource="0" file="Source/Switch.h"/>
     </GROUP>
     <GROUP id="{0EA5FA0E-AACE-FD61-9CDB-3E81B093D987}" name="Resources">
+      <GROUP id="{4D712BA3-F928-0847-4208-E47809D3D330}" name="Images">
+        <FILE id="a0nSNz" name="capybara.jpeg" compile="0" resource="1" file="../../../../Desktop/capybara.jpeg"/>
+      </GROUP>
       <GROUP id="{B02F066B-07AB-D21F-0F13-4066FB52EE9A}" name="Cabinets">
         <FILE id="X0THyb" name="cassette_recorder.wav" compile="0" resource="1"
               file="/Applications/AmpSim/Cabinets/cassette_recorder.wav"/>
         <FILE id="yel9wy" name="guitar_amp.wav" compile="0" resource="1" file="/Applications/AmpSim/Cabinets/guitar_amp.wav"/>
       </GROUP>
-      <FILE id="bVJTGp" name="capybara.jpeg" compile="0" resource="1" file="../../../../Downloads/capybara.jpeg"/>
     </GROUP>
   </MAINGROUP>
   <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1" JUCE_VST3_CAN_REPLACE_VST2="0"/>
