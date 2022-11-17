@@ -33,14 +33,14 @@
       <FILE id="CdYdIU" name="Switch.cpp" compile="1" resource="0" file="Source/Switch.cpp"/>
       <FILE id="S4Yqj7" name="Switch.h" compile="0" resource="0" file="Source/Switch.h"/>
     </GROUP>
-    <GROUP id="{0EA5FA0E-AACE-FD61-9CDB-3E81B093D987}" name="Resources">
-      <GROUP id="{4D712BA3-F928-0847-4208-E47809D3D330}" name="Images">
-        <FILE id="cf8D0L" name="capybara.jpeg" compile="0" resource="1" file="Resources/capybara.jpeg"/>
+    <GROUP id="{E62A18F4-4233-4363-9C6B-CBFFC570347C}" name="Resources">
+      <GROUP id="{256AD976-2D9D-8C1C-C55D-2F4695BD5EAA}" name="Cabinets">
+        <FILE id="OYmnmg" name="cassette_recorder.wav" compile="0" resource="1"
+              file="Resources/Cabinets/cassette_recorder.wav"/>
+        <FILE id="EjnYWX" name="guitar_amp.wav" compile="0" resource="1" file="Resources/Cabinets/guitar_amp.wav"/>
       </GROUP>
-      <GROUP id="{B02F066B-07AB-D21F-0F13-4066FB52EE9A}" name="Cabinets">
-        <FILE id="X0THyb" name="cassette_recorder.wav" compile="0" resource="1"
-              file="/Applications/AmpSim/Cabinets/cassette_recorder.wav"/>
-        <FILE id="yel9wy" name="guitar_amp.wav" compile="0" resource="1" file="/Applications/AmpSim/Cabinets/guitar_amp.wav"/>
+      <GROUP id="{A58C6EC9-33E8-78DE-BB16-E228AC2D85AD}" name="Images">
+        <FILE id="HJ5Lsa" name="capybara.jpeg" compile="0" resource="1" file="Resources/Images/capybara.jpeg"/>
       </GROUP>
     </GROUP>
   </MAINGROUP>
