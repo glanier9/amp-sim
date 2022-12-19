@@ -12,6 +12,7 @@
 
 #include <JuceHeader.h>
 #include "FxKnob1.h"
+#include "PopupKnob.h"
 
 //==============================================================================
 /*
@@ -38,7 +39,8 @@ public:
     FxKnob1 knob1;
     FxKnob1 knob2;
     FxKnob1 knob3;
-    FxKnob1 knob4;
+//    FxKnob1 knob4;
+    juce::TextButton advancedMenu { "Advanced Menu" };
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EffectModule)

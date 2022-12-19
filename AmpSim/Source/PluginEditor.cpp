@@ -70,8 +70,13 @@ AmpSimAudioProcessorEditor::AmpSimAudioProcessorEditor (AmpSimAudioProcessor& p)
     reverbToggleAtt = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>
         (audioProcessor.apvts, "REVERB", reverb.button);
     
-    /* Effect 1 */
-    // TODO
+    /* Chorus */
+    chorusRateAtt = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>
+        (audioProcessor.apvts, "CHORUSRATE", effect1.knob1);
+    chorusMixAtt = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>
+        (audioProcessor.apvts, "CHORUSMIX", effect1.knob2);
+    chorusDepth = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>
+        (audioProcessor.apvts, "CHORUSDEPTH", effect1.knob3);
     
     /* Effect 2 */
     // TODO
@@ -135,11 +140,9 @@ void AmpSimAudioProcessorEditor::resized()
     
     /* Effect 1 section */
     effect1.setBounds(fxArea1);
-    // TODO
     
     /* Effect 2 section */
     effect2.setBounds(fxArea2);
-    // TODO
     
     /* Image */
     image.setBounds(imageArea);

@@ -22,18 +22,21 @@ struct ChainSettings
     float verbMix {0}, verbRoom {0}, verbDamping {0}, verbWidth {0};
     float masterVol{ 0.5 };
     float convolution{ 1 };
+    float chorusRate { 1 }, chorusDepth { 1 }, chorusDelay { 1 },
+            chorusFeedback { 1 }, chorusMix { 1 };
 };
 ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts);
 
 /* Chain stage types */
 using NoiseGate = juce::dsp::NoiseGate<float>;
 using Gain = juce::dsp::Gain<float>;
-using WaveShaper = juce::dsp::WaveShaper<float>;\
+using WaveShaper = juce::dsp::WaveShaper<float>;
 using Filter = juce::dsp::IIR::Filter<float>;
 using FilterCoefs = juce::dsp::IIR::Coefficients<float>;
 using Reverb = juce::dsp::Reverb;
 using ReverbParams = juce::Reverb::Parameters;
 using Convolution = juce::dsp::Convolution;
+using Chorus = juce::dsp::Chorus<float>;
 
 /* Pregain chain setup */
 using InputChain = juce::dsp::ProcessorChain
@@ -101,10 +104,12 @@ const juce::StringArray HighGainAmps
 /* Effects loop setup */
 using EffectsChain = juce::dsp::ProcessorChain
 <
+    Chorus,
     Reverb
 >;
 enum EffectsChainPositions
 {
+    OutChorus,
     OutReverb
 };
 
@@ -197,6 +202,7 @@ private:
     void updateMidTone(float gainDb);
     void updateTrebleTone(float freq);
     void updateWaveshaper(float shapeSelect);
+    void updateChorus(float rate, float depth, float delay, float feedback, float mix);
     void updateReverb(float mix, float room, float damping, float width, bool bypass);
     void updateMasterVol(float gainDb);
     void updateConvolution(float cabinetSelect);

@@ -89,6 +89,9 @@ private:
     
     /* Effect 1 */
     EffectModule effect1;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> chorusRateAtt;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> chorusMixAtt;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> chorusDepth;
     
     /* Effect 2 */
     EffectModule effect2;

@@ -286,7 +286,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout AmpSimAudioProcessor::create
             25.f));
     layout.add(std::make_unique<juce::AudioParameterFloat>
         ("GATEREL", "Gate Release", 0.f, 50.f, 
-            25.0f));
+            25.f));
 
     /* Pregain */
     layout.add(std::make_unique<juce::AudioParameterFloat>
@@ -310,6 +310,18 @@ juce::AudioProcessorValueTreeState::ParameterLayout AmpSimAudioProcessor::create
     layout.add(std::make_unique<juce::AudioParameterFloat>
         ("WAVESHAPER", "Waveshaper", 1.0f, (float)AmpCount - 1.f,
             1.0f));
+    
+    /* Chorus */
+    layout.add(std::make_unique<juce::AudioParameterFloat>
+       ("CHORUSRATE", "Chorus Rate", 1.f, 10.f, 5.f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>
+       ("CHORUSDEPTH", "Chorus Depth", 0.f, 1.f, 0.5f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>
+       ("CHORUSDELAY", "Chorus Delay", 1.f, 100.f, 50.f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>
+       ("CHORUSFEEDBACK", "Chorus Feedback", -1.f, 1.f, 0.f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>
+       ("CHORUSMIX", "Chorus Mix", 0.f, 1.f, 0.5f));
     
     /* Reverb */
     layout.add(std::make_unique<juce::AudioParameterBool>
@@ -362,6 +374,13 @@ ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts)
     /* Waveshaper */
     settings.waveshaper = apvts.getRawParameterValue("WAVESHAPER")->load();
     
+    /* Chorus */
+    settings.chorusRate = apvts.getRawParameterValue("CHORUSRATE")->load();
+    settings.chorusDepth = apvts.getRawParameterValue("CHORUSDEPTH")->load();
+    settings.chorusDelay = apvts.getRawParameterValue("CHORUSDELAY")->load();
+    settings.chorusFeedback = apvts.getRawParameterValue("CHORUSFEEDBACK")->load();
+    settings.chorusMix = apvts.getRawParameterValue("CHORUSMIX")->load();
+    
     /* Reverb */
     settings.reverbToggle = apvts.getRawParameterValue("REVERB")->load();
     settings.verbMix = apvts.getRawParameterValue("VERBMIX")->load();
@@ -389,6 +408,8 @@ void AmpSimAudioProcessor::updateSettings()
     updatePreGain(settings.preGain, settings.waveshaper);
     updateToneStack(settings);
     updateWaveshaper(settings.waveshaper);
+    updateChorus(settings.chorusRate, settings.chorusDepth, settings.chorusDelay,
+                 settings.chorusFeedback, settings.chorusMix);
     updateReverb(settings.verbMix, settings.verbRoom, settings.verbDamping, 
         settings.verbWidth, settings.reverbToggle);
     updateMasterVol(settings.masterVol);
@@ -601,6 +622,32 @@ void AmpSimAudioProcessor::updateWaveshaper(float shapeSelect)
             };
             break;
         }
+}
+
+void AmpSimAudioProcessor::updateChorus(float rate, float depth, float delay, float feedback, float mix)
+{
+    auto& leftChorus = leftEffects.template get<EffectsChainPositions::OutChorus>();
+    auto& rightChorus = rightEffects.template get<EffectsChainPositions::OutChorus>();
+    
+    /* Rate */
+    leftChorus.setRate(rate);
+    rightChorus.setRate(rate);
+    
+    /* Depth */
+    leftChorus.setDepth(depth);
+    rightChorus.setDepth(depth);
+    
+    /* Delay */
+    leftChorus.setCentreDelay(delay);
+    rightChorus.setCentreDelay(delay);
+
+    /* Feedback */
+    leftChorus.setFeedback(feedback);
+    rightChorus.setFeedback(feedback);
+    
+    /* Mix */
+    leftChorus.setMix(mix);
+    rightChorus.setMix(mix);
 }
 
 void AmpSimAudioProcessor::updateReverb(float mix, float room, float damping, float width, bool enable)
