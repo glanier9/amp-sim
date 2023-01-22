@@ -18,7 +18,7 @@ struct ChainSettings
     float preGain{ 0.5 };
     float bassFreq{ 0 }, midGain{ 0 }, trebleFreq{ 0 };
     float waveshaper{ 1 };
-    float reverbToggle {1};
+    float reverbToggle { 1 };
     float verbMix {0}, verbRoom {0}, verbDamping {0}, verbWidth {0};
     float masterVol{ 0.5 };
     float convolution{ 1 };
@@ -178,6 +178,7 @@ private:
     ToneStack leftTone, rightTone;
     AmpChain leftAmp, rightAmp;
     EffectsChain leftEffects, rightEffects;
+//    juce::dsp::ProcessorDuplicator<EffectsChain, > effects;
     OutputChain leftOutput, rightOutput;
     
     /* Noise gate properties*/

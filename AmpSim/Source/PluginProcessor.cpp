@@ -122,7 +122,8 @@ void AmpSimAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock
     /* Prepare dsp chain */
     juce::dsp::ProcessSpec spec;
     spec.maximumBlockSize = samplesPerBlock;
-    spec.numChannels = getTotalNumOutputChannels();
+//    spec.numChannels = getTotalNumOutputChannels();
+    spec.numChannels = 1;
     spec.sampleRate = sampleRate;
 
     /* Get DSP values from UI */
@@ -410,7 +411,7 @@ void AmpSimAudioProcessor::updateSettings()
     updateWaveshaper(settings.waveshaper);
     updateChorus(settings.chorusRate, settings.chorusDepth, settings.chorusDelay,
                  settings.chorusFeedback, settings.chorusMix);
-    updateReverb(settings.verbMix, settings.verbRoom, settings.verbDamping, 
+    updateReverb(settings.verbMix, settings.verbRoom, settings.verbDamping,
         settings.verbWidth, settings.reverbToggle);
     updateMasterVol(settings.masterVol);
     updateConvolution(settings.convolution);
