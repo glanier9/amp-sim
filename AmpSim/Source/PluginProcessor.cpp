@@ -326,6 +326,18 @@ juce::AudioProcessorValueTreeState::ParameterLayout AmpSimAudioProcessor::create
     layout.add(std::make_unique<juce::AudioParameterFloat>
        ("CHORUSMIX", "Chorus Mix", 0.f, 1.f, 0.5f));
     
+    /* Phaser */
+    layout.add(std::make_unique<juce::AudioParameterFloat>
+       ("PHASERRATE", "Phaser Rate", 1.f, 100.f, 50.f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>
+       ("PHASERDEPTH", "Phaser Depth", 0.f, 1.f, 0.5f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>
+       ("PHASERFC", "Phaser Centre Frequency", 10.f, 8000.f, 800.f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>
+       ("PHASERFEEDBACK", "Phaser Feedback", -1.f, 1.f, 0.f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>
+       ("PHASERMIX", "Phaser Mix", 0.f, 1.f, 0.5f));
+    
     /* Reverb */
     layout.add(std::make_unique<juce::AudioParameterBool>
         ("REVERB", "Reverb Bypass", 
@@ -384,6 +396,13 @@ ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts)
     settings.chorusFeedback = apvts.getRawParameterValue("CHORUSFEEDBACK")->load();
     settings.chorusMix = apvts.getRawParameterValue("CHORUSMIX")->load();
     
+    /* Phaser */
+    settings.phaserRate = apvts.getRawParameterValue("PHASERRATE")->load();
+    settings.phaserDepth = apvts.getRawParameterValue("PHASERDEPTH")->load();
+    settings.phaserCentFreq = apvts.getRawParameterValue("PHASERFC")->load();
+    settings.phaserFeedback = apvts.getRawParameterValue("PHASERFEEDBACK")->load();
+    settings.phaserMix = apvts.getRawParameterValue("PHASERMIX")->load();
+    
     /* Reverb */
     settings.reverbToggle = apvts.getRawParameterValue("REVERB")->load();
     settings.verbMix = apvts.getRawParameterValue("VERBMIX")->load();
@@ -413,6 +432,8 @@ void AmpSimAudioProcessor::updateSettings()
     updateWaveshaper(settings.waveshaper);
     updateChorus(settings.chorusRate, settings.chorusDepth, settings.chorusDelay,
                  settings.chorusFeedback, settings.chorusMix);
+    updatePhaser(settings.phaserRate, settings.phaserDepth, settings.phaserCentFreq,
+                 settings.phaserFeedback, settings.phaserMix);
     updateReverb(settings.verbMix, settings.verbRoom, settings.verbDamping,
         settings.verbWidth, settings.reverbToggle);
     updateMasterVol(settings.masterVol);
@@ -654,6 +675,32 @@ void AmpSimAudioProcessor::updateChorus(float rate, float depth, float delay, fl
     /* Mix */
     leftChorus.setMix(mix);
     rightChorus.setMix(mix);
+}
+
+void AmpSimAudioProcessor::updatePhaser(float rate, float depth, float fc, float feedback, float mix)
+{
+    auto& leftPhaser = leftEffects.template get<EffectsChainPositions::OutPhaser>();
+    auto& rightPhaser = rightEffects.template get<EffectsChainPositions::OutPhaser>();
+    
+    /* Rate */
+    leftPhaser.setRate(rate);
+    rightPhaser.setRate(rate);
+    
+    /* Depth */
+    leftPhaser.setDepth(depth);
+    rightPhaser.setDepth(depth);
+    
+    /* Delay */
+    leftPhaser.setCentreFrequency(fc);
+    rightPhaser.setCentreFrequency(fc);
+
+    /* Feedback */
+    leftPhaser.setFeedback(feedback);
+    rightPhaser.setFeedback(feedback);
+    
+    /* Mix */
+    leftPhaser.setMix(mix);
+    rightPhaser.setMix(mix);
 }
 
 void AmpSimAudioProcessor::updateReverb(float mix, float room, float damping, float width, bool enable)

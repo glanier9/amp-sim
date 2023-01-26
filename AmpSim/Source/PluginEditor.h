@@ -91,10 +91,13 @@ private:
     EffectModule effect1;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> chorusRateAtt;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> chorusMixAtt;
-    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> chorusDepth;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> chorusDepthAtt;
     
     /* Effect 2 */
     EffectModule effect2;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> phaserRateAtt;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> phaserMixAtt;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> phaserDepthAtt;
 
     /* Convolution combo box */
     SelectionBox convolutionCombo;

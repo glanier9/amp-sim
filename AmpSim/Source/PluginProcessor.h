@@ -24,6 +24,8 @@ struct ChainSettings
     float convolution{ 1 };
     float chorusRate { 1 }, chorusDepth { 1 }, chorusDelay { 1 },
             chorusFeedback { 1 }, chorusMix { 1 };
+    float phaserRate { 1 }, phaserDepth { 1 }, phaserCentFreq { 1 },
+            phaserFeedback { 1 }, phaserMix { 1 };
 };
 ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts);
 
@@ -37,6 +39,7 @@ using Reverb = juce::dsp::Reverb;
 using ReverbParams = juce::Reverb::Parameters;
 using Convolution = juce::dsp::Convolution;
 using Chorus = juce::dsp::Chorus<float>;
+using Phaser = juce::dsp::Phaser<float>;
 
 /* Pregain chain setup */
 using InputChain = juce::dsp::ProcessorChain
@@ -105,11 +108,13 @@ const juce::StringArray HighGainAmps
 using EffectsChain = juce::dsp::ProcessorChain
 <
     Chorus,
+    Phaser,
     Reverb
 >;
 enum EffectsChainPositions
 {
     OutChorus,
+    OutPhaser,
     OutReverb
 };
 
@@ -204,6 +209,7 @@ private:
     void updateTrebleTone(float freq);
     void updateWaveshaper(float shapeSelect);
     void updateChorus(float rate, float depth, float delay, float feedback, float mix);
+    void updatePhaser(float rate, float depth, float fc, float feedback, float mix);
     void updateReverb(float mix, float room, float damping, float width, bool bypass);
     void updateMasterVol(float gainDb);
     void updateConvolution(float cabinetSelect);

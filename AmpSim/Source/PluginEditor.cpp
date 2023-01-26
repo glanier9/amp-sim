@@ -75,11 +75,16 @@ AmpSimAudioProcessorEditor::AmpSimAudioProcessorEditor (AmpSimAudioProcessor& p)
         (audioProcessor.apvts, "CHORUSRATE", effect1.knob1);
     chorusMixAtt = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>
         (audioProcessor.apvts, "CHORUSMIX", effect1.knob2);
-    chorusDepth = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>
+    chorusDepthAtt = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>
         (audioProcessor.apvts, "CHORUSDEPTH", effect1.knob3);
     
     /* Effect 2 */
-    // TODO
+    phaserRateAtt = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>
+        (audioProcessor.apvts, "PHASERRATE", effect2.knob1);
+    phaserMixAtt = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>
+        (audioProcessor.apvts, "PHASERMIX", effect2.knob2);
+    phaserDepthAtt = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>
+        (audioProcessor.apvts, "PHASERDEPTH", effect2.knob3);
     
     /* Image */
     // TODO
