@@ -290,8 +290,10 @@ juce::AudioProcessorValueTreeState::ParameterLayout AmpSimAudioProcessor::create
             25.f));
 
     /* Pregain */
+//    layout.add(std::make_unique<juce::AudioParameterFloat>
+//        ("GAIN", "Gain", 50.f, 80.f, 65.f));
     layout.add(std::make_unique<juce::AudioParameterFloat>
-        ("GAIN", "Gain", 50.f, 80.f, 65.f));
+        ("GAIN", "Gain", 0.f, 100.f, 50.f));
 
     /* EQ filters */
     layout.add(std::make_unique<juce::AudioParameterFloat>
@@ -451,17 +453,20 @@ void AmpSimAudioProcessor::updatePreGain(float gainDb, float amp)
     auto& rightPreGain = rightInput.template get<InputChainPositions::PreGain>();
 
     /* Set new gain level */
-    switch((int)amp)
-    {
-        case Circle7:
-            leftPreGain.setGainDecibels(gainDb - 20.f);
-            rightPreGain.setGainDecibels(gainDb - 20.f);
-            break;
-        default:
-            leftPreGain.setGainDecibels(gainDb);
-            rightPreGain.setGainDecibels(gainDb);
-            break;
-    }
+//    switch((int)amp)
+//    {
+//        case Circle7:
+//            leftPreGain.setGainDecibels(gainDb - 20.f);
+//            rightPreGain.setGainDecibels(gainDb - 20.f);
+//            break;
+//        default:
+//            leftPreGain.setGainDecibels(gainDb);
+//            rightPreGain.setGainDecibels(gainDb);
+//            break;
+//    }
+    
+    leftPreGain.setGainDecibels(gainDb);
+    rightPreGain.setGainDecibels(gainDb);
 }
 
 void AmpSimAudioProcessor::updateToneStack(const ChainSettings &chainSettings)
@@ -593,23 +598,23 @@ void AmpSimAudioProcessor::updateWaveshaper(float shapeSelect)
                 if (x > -0.08905f)
                 {
                     if (x < 0.320018f)
-                        return -6.152f*pow(x, 2.f) + 3.9375f*x;
+                        return -6.153f*pow(x, 2.f) + 3.9375f*x;
                     else
                         return 0.630035f;
                 }
                 else
-                    return -1.f*( (3.f/4.f)*( 1.f - (1.f - pow(abs(x) - 0.032847f, 12.f) + (1.f/3.f)*(abs(x) - 0.032847f))) + 0.01f);
+                    return (-3.f/4.f)*( 1.f - pow(1.f - (abs(x) - 0.032847f), 12.f) + (1.f/3.f)*(abs(x) - 0.032847f)) + 0.01f;
             };
             rightWaveShape.functionToUse = [](float x) {
                 if (x > -0.08905f)
                 {
                     if (x < 0.320018f)
-                        return -6.152f*pow(x, 2.f) + 3.9375f*x;
+                        return -6.153f*pow(x, 2.f) + 3.9375f*x;
                     else
                         return 0.630035f;
                 }
                 else
-                    return -1.f*( (3.f/4.f)*( 1.f - (1.f - pow(abs(x) - 0.032847f, 12.f) + (1.f/3.f)*(abs(x) - 0.032847f))) + 0.01f);
+                    return (-3.f/4.f)*( 1.f - pow(1.f - (abs(x) - 0.032847f), 12.f) + (1.f/3.f)*(abs(x) - 0.032847f)) + 0.01f;
             };
             break;
         case ForkInToaster: // Basic hard clipper
