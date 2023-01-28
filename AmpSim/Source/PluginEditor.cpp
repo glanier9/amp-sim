@@ -150,7 +150,7 @@ void AmpSimAudioProcessorEditor::resized()
     effect2.setBounds(fxArea2);
     
     /* Image */
-    image.setBounds(imageArea);
+    ampImage.setBounds(imageArea);
 }
 
 /* 
@@ -163,20 +163,19 @@ void AmpSimAudioProcessorEditor::waveshaperChanged()
 {
     switch (waveShaperCombo.getSelectedId())
     {
-    case stylePlain:
-        // Nothing for now
-        //comboBox.setStyleFlags(juce::Font::plain);
-        break;
-    case styleBold:
-        // Nothing for now
-        //waveBoxFont.setStyleFlags(juce::Font::bold);
-        break;
+    case Clean:
+            ampImage.setImage(juce::ImageCache::getFromMemory(BinaryData::capybara_jpeg, BinaryData::capybara_jpegSize));
+            //comboBox.setStyleFlags(juce::Font::plain);
+            break;
+    case SmolCronch:
+            ampImage.setImage(juce::ImageCache::getFromMemory(BinaryData::capybara2_jpeg, BinaryData::capybara2_jpegSize));
+            break;
     case styleItalic:
-        // Nothing for now
-        //waveBoxFont.setStyleFlags(juce::Font::italic);
-        break;
+            // Nothing for now
+            //waveBoxFont.setStyleFlags(juce::Font::italic);
+            break;
     default: 
-        break;
+            break;
     }
     //waveBoxLabel.setFont(waveBoxFont);
 }
@@ -225,6 +224,6 @@ std::vector<juce::Component*> AmpSimAudioProcessorEditor::getComps()
         &effect2,
         
         /* Image */
-        &image
+        &ampImage
     };
 }

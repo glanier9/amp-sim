@@ -108,7 +108,8 @@ private:
     AmpSimAudioProcessor& audioProcessor;
     
     /* Image */
-    AmpImage image;
+    //AmpImage image;
+    juce::ImageComponent ampImage;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AmpSimAudioProcessorEditor)
 };

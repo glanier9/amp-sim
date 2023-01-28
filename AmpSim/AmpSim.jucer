@@ -42,6 +42,7 @@
         <FILE id="EjnYWX" name="guitar_amp.wav" compile="0" resource="1" file="Resources/Cabinets/guitar_amp.wav"/>
       </GROUP>
       <GROUP id="{A58C6EC9-33E8-78DE-BB16-E228AC2D85AD}" name="Images">
+        <FILE id="SQXq1F" name="capybara2.jpeg" compile="0" resource="1" file="../../../../Downloads/capybara2.jpeg"/>
         <FILE id="HJ5Lsa" name="capybara.jpeg" compile="0" resource="1" file="Resources/Images/capybara.jpeg"/>
       </GROUP>
     </GROUP>
