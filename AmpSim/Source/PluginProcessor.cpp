@@ -11,6 +11,10 @@
 #include "BinaryData.h"
 
 //==============================================================================
+/*
+    Constructor/Destructor
+ */
+//==============================================================================
 AmpSimAudioProcessor::AmpSimAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
      : AudioProcessor (BusesProperties()
@@ -22,31 +26,10 @@ AmpSimAudioProcessor::AmpSimAudioProcessor()
                      #endif
                        ),
     /* Initialize members */
-    apvts(*this, nullptr, "Parameters", createParamLayout())
+    apvts(*this, nullptr, "Parameters", createParamLayout()),
+    oversampler(2, 3, juce::dsp::Oversampling<float>::FilterType::filterHalfBandPolyphaseIIR)
 #endif
 {
-    /*
-            Constructor Stuff
-     */
-    
-    /* Set up file system  for cabinets */
-    // These are currently the same, but I left in just to show how changes can be made
-    // between platforms.
-//    #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
-//        rootDir = juce::File::getSpecialLocation(juce::File::globalApplicationsDirectory);
-//        numTries = 0;
-//        while (!rootDir.getChildFile("AmpSim").exists() && numTries++ < 40)
-//        {
-//            rootDir = rootDir.getParentDirectory();
-//        }
-//    #elif __APPLE__
-//        rootDir = juce::File::getSpecialLocation(juce::File::globalApplicationsDirectory);
-//        numTries = 0;
-//        while (!rootDir.getChildFile("AmpSim").exists() && numTries++ < 40)
-//        {
-//            rootDir = rootDir.getParentDirectory();
-//        }
-//    #endif
     
 }
 
@@ -55,75 +38,16 @@ AmpSimAudioProcessor::~AmpSimAudioProcessor()
 }
 
 //==============================================================================
-const juce::String AmpSimAudioProcessor::getName() const
-{
-    return JucePlugin_Name;
-}
-
-bool AmpSimAudioProcessor::acceptsMidi() const
-{
-   #if JucePlugin_WantsMidiInput
-    return true;
-   #else
-    return false;
-   #endif
-}
-
-bool AmpSimAudioProcessor::producesMidi() const
-{
-   #if JucePlugin_ProducesMidiOutput
-    return true;
-   #else
-    return false;
-   #endif
-}
-
-bool AmpSimAudioProcessor::isMidiEffect() const
-{
-   #if JucePlugin_IsMidiEffect
-    return true;
-   #else
-    return false;
-   #endif
-}
-
-double AmpSimAudioProcessor::getTailLengthSeconds() const
-{
-    return 0.0;
-}
-
-int AmpSimAudioProcessor::getNumPrograms()
-{
-    return 1;   // NB: some hosts don't cope very well if you tell them there are 0 programs,
-                // so this should be at least 1, even if you're not really implementing programs.
-}
-
-int AmpSimAudioProcessor::getCurrentProgram()
-{
-    return 0;
-}
-
-void AmpSimAudioProcessor::setCurrentProgram (int index)
-{
-}
-
-const juce::String AmpSimAudioProcessor::getProgramName (int index)
-{
-    return {};
-}
-
-void AmpSimAudioProcessor::changeProgramName (int index, const juce::String& newName)
-{
-}
-
+/*
+    Processing Functions
+ */
 //==============================================================================
 void AmpSimAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
     /* Prepare dsp chain */
     juce::dsp::ProcessSpec spec;
     spec.maximumBlockSize = samplesPerBlock;
-//    spec.numChannels = getTotalNumOutputChannels();
-    spec.numChannels = 1;
+    spec.numChannels = 1;   // Each stereo channel is being processed individually
     spec.sampleRate = sampleRate;
 
     /* Get DSP values from UI */
@@ -132,11 +56,80 @@ void AmpSimAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock
     /* Prepare DSP chains */
     leftInput.prepare(spec); rightInput.prepare(spec);
     leftTone.prepare(spec); rightTone.prepare(spec);
+    spec.sampleRate = sampleRate * pow(2, oversampler.getOversamplingFactor());
     leftAmp.prepare(spec); rightAmp.prepare(spec);
+    spec.sampleRate = sampleRate;
     leftEffects.prepare(spec); rightEffects.prepare(spec);
     leftOutput.prepare(spec); rightOutput.prepare(spec);
     
     /* Empty DSP chains */
+    reset();
+    
+    /* Other setup */
+    oversampler.initProcessing(samplesPerBlock);
+    spec.numChannels = getTotalNumOutputChannels();
+}
+
+void AmpSimAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
+{
+    /* Get basic processing info */
+    juce::ScopedNoDenormals noDenormals;
+    auto totalNumInputChannels  = getTotalNumInputChannels();
+    auto totalNumOutputChannels = getTotalNumOutputChannels();
+
+    /* Clear old buffer */
+    for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
+        buffer.clear (i, 0, buffer.getNumSamples());
+    
+    /* Get slider/button/combo box settings to update dsp values */
+    updateSettings();
+    
+    /* Process input chain */
+    juce::dsp::AudioBlock<float> InputBlock(buffer);
+    auto leftBlock = InputBlock.getSingleChannelBlock(0);
+    auto rightBlock = InputBlock.getSingleChannelBlock(1);
+    juce::dsp::ProcessContextReplacing<float> leftInputContext(leftBlock);
+    juce::dsp::ProcessContextReplacing<float> rightInputContext(rightBlock);
+    leftInput.process(leftInputContext); rightInput.process(rightInputContext);
+    
+    /* Process tone stack */
+    juce::dsp::AudioBlock<float> toneBlock(buffer);
+    leftBlock = toneBlock.getSingleChannelBlock(0);
+    rightBlock = toneBlock.getSingleChannelBlock(1);
+    juce::dsp::ProcessContextReplacing<float> leftToneContext(leftBlock);
+    juce::dsp::ProcessContextReplacing<float> rightToneContext(rightBlock);
+    leftTone.process(leftToneContext); rightTone.process(rightToneContext);
+    
+    /* Process amp chain */
+    juce::dsp::AudioBlock<float> ampBlock(buffer);
+    juce::dsp::AudioBlock<float> upSampledBlock(oversampler.processSamplesUp(ampBlock));
+    leftBlock = upSampledBlock.getSingleChannelBlock(0);
+    rightBlock = upSampledBlock.getSingleChannelBlock(1);
+    juce::dsp::ProcessContextReplacing<float> leftAmpContext(leftBlock);
+    juce::dsp::ProcessContextReplacing<float> rightAmpContext(rightBlock);
+    leftAmp.process(leftAmpContext); rightAmp.process(rightAmpContext);
+    oversampler.processSamplesDown(ampBlock);
+    
+    /* Process effects chain */
+    juce::dsp::AudioBlock<float> effectsBlock(buffer);
+    leftBlock = effectsBlock.getSingleChannelBlock(0);
+    rightBlock = effectsBlock.getSingleChannelBlock(1);
+    juce::dsp::ProcessContextReplacing<float> leftEffectsContext(leftBlock);
+    juce::dsp::ProcessContextReplacing<float> rightEffectsContext(rightBlock);
+    leftEffects.process(leftEffectsContext); rightEffects.process(rightEffectsContext);
+    
+    /* Process output chain */
+    juce::dsp::AudioBlock<float> outputBlock(buffer);
+    leftBlock = outputBlock.getSingleChannelBlock(0);
+    rightBlock = outputBlock.getSingleChannelBlock(1);
+    juce::dsp::ProcessContextReplacing<float> leftOutputContext(leftBlock);
+    juce::dsp::ProcessContextReplacing<float> rightOutputContext(rightBlock);
+    leftOutput.process(leftOutputContext); rightOutput.process(rightOutputContext);
+}
+
+void AmpSimAudioProcessor::reset()
+{
+    oversampler.reset();
     leftInput.reset(); rightInput.reset();
     leftTone.reset(); rightTone.reset();
     leftAmp.reset(); rightAmp.reset();
@@ -173,272 +166,6 @@ bool AmpSimAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) c
   #endif
 }
 #endif
-
-void AmpSimAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
-{
-    /* Get basic processing info */
-    juce::ScopedNoDenormals noDenormals;
-    auto totalNumInputChannels  = getTotalNumInputChannels();
-    auto totalNumOutputChannels = getTotalNumOutputChannels();
-
-    /* Clear old buffer */
-    for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
-        buffer.clear (i, 0, buffer.getNumSamples());
-    
-    /* Get slider/button/combo box settings to update dsp values */
-    updateSettings();
-    
-    /* Process input chain */
-    juce::dsp::AudioBlock<float> InputBlock(buffer);
-    auto leftBlock = InputBlock.getSingleChannelBlock(0);
-    auto rightBlock = InputBlock.getSingleChannelBlock(1);
-    juce::dsp::ProcessContextReplacing<float> leftInputContext(leftBlock);
-    juce::dsp::ProcessContextReplacing<float> rightInputContext(rightBlock);
-    leftInput.process(leftInputContext); rightInput.process(rightInputContext);
-    
-    /* Process tone stack */
-    juce::dsp::AudioBlock<float> toneBlock(buffer);
-    leftBlock = toneBlock.getSingleChannelBlock(0);
-    rightBlock = toneBlock.getSingleChannelBlock(1);
-    juce::dsp::ProcessContextReplacing<float> leftToneContext(leftBlock);
-    juce::dsp::ProcessContextReplacing<float> rightToneContext(rightBlock);
-    leftTone.process(leftToneContext); rightTone.process(rightToneContext);
-
-    /* Process amp chain */
-    juce::dsp::AudioBlock<float> ampBlock(buffer);
-    leftBlock = ampBlock.getSingleChannelBlock(0);
-    rightBlock = ampBlock.getSingleChannelBlock(1);
-    juce::dsp::ProcessContextReplacing<float> leftAmpContext(leftBlock);
-    juce::dsp::ProcessContextReplacing<float> rightAmpContext(rightBlock);
-    leftAmp.process(leftAmpContext); rightAmp.process(rightAmpContext);
-    
-    /* Process effects chain */
-    juce::dsp::AudioBlock<float> effectsBlock(buffer);
-    leftBlock = effectsBlock.getSingleChannelBlock(0);
-    rightBlock = effectsBlock.getSingleChannelBlock(1);
-    juce::dsp::ProcessContextReplacing<float> leftEffectsContext(leftBlock);
-    juce::dsp::ProcessContextReplacing<float> rightEffectsContext(rightBlock);
-    leftEffects.process(leftEffectsContext); rightEffects.process(rightEffectsContext);
-    
-    /* Process output chain */
-    juce::dsp::AudioBlock<float> outputBlock(buffer);
-    leftBlock = outputBlock.getSingleChannelBlock(0);
-    rightBlock = outputBlock.getSingleChannelBlock(1);
-    juce::dsp::ProcessContextReplacing<float> leftOutputContext(leftBlock);
-    juce::dsp::ProcessContextReplacing<float> rightOutputContext(rightBlock);
-    leftOutput.process(leftOutputContext); rightOutput.process(rightOutputContext);
-}
-
-//==============================================================================
-bool AmpSimAudioProcessor::hasEditor() const
-{
-    return true;
-}
-
-juce::AudioProcessorEditor* AmpSimAudioProcessor::createEditor()
-{
-    return new AmpSimAudioProcessorEditor (*this);
-}
-
-//==============================================================================
-void AmpSimAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
-{
-    /* Loads plugin parameter state */
-    juce::MemoryOutputStream mos(destData, true);
-    apvts.state.writeToStream(mos);
-}
-
-void AmpSimAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
-{
-    /* Restores plugin state from memory */
-    auto tree = juce::ValueTree::readFromData(data, sizeInBytes);
-    if (tree.isValid())
-    {
-        apvts.replaceState(tree);
-        updateSettings();
-    }
-}
-
-//==============================================================================
-// This creates new instances of the plugin..
-juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
-{
-    return new AmpSimAudioProcessor();
-}
-
-juce::AudioProcessorValueTreeState::ParameterLayout AmpSimAudioProcessor::createParamLayout()
-{
-    /* Generate param layout*/
-    juce::AudioProcessorValueTreeState::ParameterLayout layout;
-
-    /*
-        Layout parameters
-     */
-
-    /* Noise Gate*/
-    layout.add(std::make_unique<juce::AudioParameterBool>
-        ("GATE", "Gate Bypass", 
-            true));
-    layout.add(std::make_unique<juce::AudioParameterFloat>
-        ("GATETHRESH", "Gate Threshold", -60.f, -40.f, 
-            -50.f));
-    layout.add(std::make_unique<juce::AudioParameterFloat>
-        ("GATEATT", "Gate Attack", 0.f, 50.f, 
-            25.f));
-    layout.add(std::make_unique<juce::AudioParameterFloat>
-        ("GATEREL", "Gate Release", 0.f, 50.f, 
-            25.f));
-
-    /* Pregain */
-//    layout.add(std::make_unique<juce::AudioParameterFloat>
-//        ("GAIN", "Gain", 50.f, 80.f, 65.f));
-    layout.add(std::make_unique<juce::AudioParameterFloat>
-        ("GAIN", "Gain", 0.f, 100.f, 50.f));
-
-    /* EQ filters */
-    layout.add(std::make_unique<juce::AudioParameterFloat>
-        ("BASS", "Bass",
-            juce::NormalisableRange<float>(-318.f, -60.f, 1.f, 1.f), // Range
-            -189.f)); // Default value
-    layout.add(std::make_unique<juce::AudioParameterFloat>
-        ("MID", "Mid",
-            juce::NormalisableRange<float>(-24.f, 0.f, 0.1f, 1.f),
-            -12.5f));
-    layout.add(std::make_unique<juce::AudioParameterFloat>
-        ("TREBLE", "Treble",
-            juce::NormalisableRange<float>(800.f, 2500.f, 1.f, 1.f),
-            1700.f));
-
-    /* Waveshaper */
-    layout.add(std::make_unique<juce::AudioParameterFloat>
-        ("WAVESHAPER", "Waveshaper", 1.0f, (float)AmpCount - 1.f,
-            1.0f));
-    
-    /* Chorus */
-    layout.add(std::make_unique<juce::AudioParameterFloat>
-       ("CHORUSRATE", "Chorus Rate", 1.f, 10.f, 5.f));
-    layout.add(std::make_unique<juce::AudioParameterFloat>
-       ("CHORUSDEPTH", "Chorus Depth", 0.f, 1.f, 0.5f));
-    layout.add(std::make_unique<juce::AudioParameterFloat>
-       ("CHORUSDELAY", "Chorus Delay", 1.f, 100.f, 50.f));
-    layout.add(std::make_unique<juce::AudioParameterFloat>
-       ("CHORUSFEEDBACK", "Chorus Feedback", -1.f, 1.f, 0.f));
-    layout.add(std::make_unique<juce::AudioParameterFloat>
-       ("CHORUSMIX", "Chorus Mix", 0.f, 1.f, 0.5f));
-    
-    /* Phaser */
-    layout.add(std::make_unique<juce::AudioParameterFloat>
-       ("PHASERRATE", "Phaser Rate", 1.f, 100.f, 50.f));
-    layout.add(std::make_unique<juce::AudioParameterFloat>
-       ("PHASERDEPTH", "Phaser Depth", 0.f, 1.f, 0.5f));
-    layout.add(std::make_unique<juce::AudioParameterFloat>
-       ("PHASERFC", "Phaser Centre Frequency", 10.f, 8000.f, 800.f));
-    layout.add(std::make_unique<juce::AudioParameterFloat>
-       ("PHASERFEEDBACK", "Phaser Feedback", -1.f, 1.f, 0.f));
-    layout.add(std::make_unique<juce::AudioParameterFloat>
-       ("PHASERMIX", "Phaser Mix", 0.f, 1.f, 0.5f));
-    
-    /* Reverb */
-    layout.add(std::make_unique<juce::AudioParameterBool>
-        ("REVERB", "Reverb Bypass", 
-            true));
-    layout.add(std::make_unique<juce::AudioParameterFloat>
-        ("VERBMIX", "Reverb Mix", 0.f, 1.f, 
-            0.5f));
-    layout.add(std::make_unique<juce::AudioParameterFloat>
-        ("VERBROOM", "Reverb Room", 0.f, 1.f, 
-            0.5f));
-    layout.add(std::make_unique<juce::AudioParameterFloat>
-        ("VERBDAMPING", "Reverb Damping", 0.f, 1.f, 
-            0.5f));
-    layout.add(std::make_unique<juce::AudioParameterFloat>
-        ("VERBWIDTH", "Reverb Width", 0.f, 1.f, 
-            0.5f));
-
-    /* Master volume */
-    layout.add(std::make_unique<juce::AudioParameterFloat>
-        ("MASTERVOL", "Output", -40.f, 0.f,
-            -20.f));
-
-    /* Cabinet */
-    layout.add(std::make_unique<juce::AudioParameterFloat>
-        ("CONVOLUTION", "Cabinet", 1.f, 2.f,
-            1.f));
-
-    return(layout);
-}
-
-ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts)
-{
-    ChainSettings settings;
-
-    /* Noise gate */
-    settings.gateToggle = apvts.getRawParameterValue("GATE")->load() > 0.5f;
-    settings.gateThreshold = apvts.getRawParameterValue("GATETHRESH")->load();
-    settings.gateAttack = apvts.getRawParameterValue("GATEATT")->load();
-    settings.gateRelease = apvts.getRawParameterValue("GATEREL")->load();
-
-    /* Pregain */
-    settings.preGain = apvts.getRawParameterValue("GAIN")->load();
-
-    /* EQ filters */
-    settings.bassFreq = apvts.getRawParameterValue("BASS")->load();
-    settings.midGain = apvts.getRawParameterValue("MID")->load();
-    settings.trebleFreq = apvts.getRawParameterValue("TREBLE")->load();
-
-    /* Waveshaper */
-    settings.waveshaper = apvts.getRawParameterValue("WAVESHAPER")->load();
-    
-    /* Chorus */
-    settings.chorusRate = apvts.getRawParameterValue("CHORUSRATE")->load();
-    settings.chorusDepth = apvts.getRawParameterValue("CHORUSDEPTH")->load();
-    settings.chorusDelay = apvts.getRawParameterValue("CHORUSDELAY")->load();
-    settings.chorusFeedback = apvts.getRawParameterValue("CHORUSFEEDBACK")->load();
-    settings.chorusMix = apvts.getRawParameterValue("CHORUSMIX")->load();
-    
-    /* Phaser */
-    settings.phaserRate = apvts.getRawParameterValue("PHASERRATE")->load();
-    settings.phaserDepth = apvts.getRawParameterValue("PHASERDEPTH")->load();
-    settings.phaserCentFreq = apvts.getRawParameterValue("PHASERFC")->load();
-    settings.phaserFeedback = apvts.getRawParameterValue("PHASERFEEDBACK")->load();
-    settings.phaserMix = apvts.getRawParameterValue("PHASERMIX")->load();
-    
-    /* Reverb */
-    settings.reverbToggle = apvts.getRawParameterValue("REVERB")->load();
-    settings.verbMix = apvts.getRawParameterValue("VERBMIX")->load();
-    settings.verbRoom = apvts.getRawParameterValue("VERBROOM")->load();
-    settings.verbDamping = apvts.getRawParameterValue("VERBDAMPING")->load();
-    settings.verbWidth = apvts.getRawParameterValue("VERBWIDTH")->load();
-
-    /* Master volume */
-    settings.masterVol = apvts.getRawParameterValue("MASTERVOL")->load();
-
-    /* Convolution */
-    settings.convolution = apvts.getRawParameterValue("CONVOLUTION")->load();
-
-    return settings;
-}
-
-void AmpSimAudioProcessor::updateSettings()
-{
-    /* Retrieve slider settings*/
-    ChainSettings settings = getChainSettings(apvts);
-
-    /* Update dsp settings */
-    updateNoiseGate(settings.gateThreshold, settings.gateAttack, settings.gateRelease, 
-        settings.gateToggle);
-    updatePreGain(settings.preGain, settings.waveshaper);
-    updateToneStack(settings);
-    updateWaveshaper(settings.waveshaper);
-    updateChorus(settings.chorusRate, settings.chorusDepth, settings.chorusDelay,
-                 settings.chorusFeedback, settings.chorusMix);
-    updatePhaser(settings.phaserRate, settings.phaserDepth, settings.phaserCentFreq,
-                 settings.phaserFeedback, settings.phaserMix);
-    updateReverb(settings.verbMix, settings.verbRoom, settings.verbDamping,
-        settings.verbWidth, settings.reverbToggle);
-    updateMasterVol(settings.masterVol);
-    updateConvolution(settings.convolution);
-}
 
 void AmpSimAudioProcessor::updateNoiseGate(float thresh, float att, float rel, bool bypass)
 {
@@ -486,6 +213,7 @@ void AmpSimAudioProcessor::updatePreGain(float gainDb, float amp)
 //            break;
 //    }
     
+    // For testing until every volume scale is set up
     leftPreGain.setGainDecibels(gainDb);
     rightPreGain.setGainDecibels(gainDb);
 }
@@ -769,4 +497,284 @@ void AmpSimAudioProcessor::updateConvolution(float cabinetSelect)
                                         1024);
         break;
     }
+}
+
+
+//==============================================================================
+/*
+    UI Connection Functions
+ */
+//==============================================================================
+juce::AudioProcessorValueTreeState::ParameterLayout AmpSimAudioProcessor::createParamLayout()
+{
+    /* Generate param layout*/
+    juce::AudioProcessorValueTreeState::ParameterLayout layout;
+
+    /*
+        Layout parameters
+     */
+
+    /* Noise Gate*/
+    layout.add(std::make_unique<juce::AudioParameterBool>
+        ("GATE", "Gate Bypass",
+            true));
+    layout.add(std::make_unique<juce::AudioParameterFloat>
+        ("GATETHRESH", "Gate Threshold", -60.f, -40.f,
+            -50.f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>
+        ("GATEATT", "Gate Attack", 0.f, 50.f,
+            25.f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>
+        ("GATEREL", "Gate Release", 0.f, 50.f,
+            25.f));
+
+    /* Pregain */
+//    layout.add(std::make_unique<juce::AudioParameterFloat>
+//        ("GAIN", "Gain", 50.f, 80.f, 65.f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>
+        ("GAIN", "Gain", 0.f, 100.f, 50.f));
+
+    /* EQ filters */
+    layout.add(std::make_unique<juce::AudioParameterFloat>
+        ("BASS", "Bass",
+            juce::NormalisableRange<float>(-318.f, -60.f, 1.f, 1.f), // Range
+            -189.f)); // Default value
+    layout.add(std::make_unique<juce::AudioParameterFloat>
+        ("MID", "Mid",
+            juce::NormalisableRange<float>(-24.f, 0.f, 0.1f, 1.f),
+            -12.5f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>
+        ("TREBLE", "Treble",
+            juce::NormalisableRange<float>(800.f, 2500.f, 1.f, 1.f),
+            1700.f));
+
+    /* Waveshaper */
+    layout.add(std::make_unique<juce::AudioParameterFloat>
+        ("WAVESHAPER", "Waveshaper", 1.0f, (float)AmpCount - 1.f,
+            1.0f));
+    
+    /* Chorus */
+    layout.add(std::make_unique<juce::AudioParameterFloat>
+       ("CHORUSRATE", "Chorus Rate", 1.f, 10.f, 5.f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>
+       ("CHORUSDEPTH", "Chorus Depth", 0.f, 1.f, 0.5f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>
+       ("CHORUSDELAY", "Chorus Delay", 1.f, 100.f, 50.f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>
+       ("CHORUSFEEDBACK", "Chorus Feedback", -1.f, 1.f, 0.f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>
+       ("CHORUSMIX", "Chorus Mix", 0.f, 1.f, 0.5f));
+    
+    /* Phaser */
+    layout.add(std::make_unique<juce::AudioParameterFloat>
+       ("PHASERRATE", "Phaser Rate", 1.f, 100.f, 50.f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>
+       ("PHASERDEPTH", "Phaser Depth", 0.f, 1.f, 0.5f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>
+       ("PHASERFC", "Phaser Centre Frequency", 10.f, 8000.f, 800.f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>
+       ("PHASERFEEDBACK", "Phaser Feedback", -1.f, 1.f, 0.f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>
+       ("PHASERMIX", "Phaser Mix", 0.f, 1.f, 0.5f));
+    
+    /* Reverb */
+    layout.add(std::make_unique<juce::AudioParameterBool>
+        ("REVERB", "Reverb Bypass",
+            true));
+    layout.add(std::make_unique<juce::AudioParameterFloat>
+        ("VERBMIX", "Reverb Mix", 0.f, 1.f,
+            0.5f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>
+        ("VERBROOM", "Reverb Room", 0.f, 1.f,
+            0.5f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>
+        ("VERBDAMPING", "Reverb Damping", 0.f, 1.f,
+            0.5f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>
+        ("VERBWIDTH", "Reverb Width", 0.f, 1.f,
+            0.5f));
+
+    /* Master volume */
+    layout.add(std::make_unique<juce::AudioParameterFloat>
+        ("MASTERVOL", "Output", -40.f, 0.f,
+            -20.f));
+
+    /* Cabinet */
+    layout.add(std::make_unique<juce::AudioParameterFloat>
+        ("CONVOLUTION", "Cabinet", 1.f, 2.f,
+            1.f));
+
+    return(layout);
+}
+
+ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts)
+{
+    ChainSettings settings;
+
+    /* Noise gate */
+    settings.gateToggle = apvts.getRawParameterValue("GATE")->load() > 0.5f;
+    settings.gateThreshold = apvts.getRawParameterValue("GATETHRESH")->load();
+    settings.gateAttack = apvts.getRawParameterValue("GATEATT")->load();
+    settings.gateRelease = apvts.getRawParameterValue("GATEREL")->load();
+
+    /* Pregain */
+    settings.preGain = apvts.getRawParameterValue("GAIN")->load();
+
+    /* EQ filters */
+    settings.bassFreq = apvts.getRawParameterValue("BASS")->load();
+    settings.midGain = apvts.getRawParameterValue("MID")->load();
+    settings.trebleFreq = apvts.getRawParameterValue("TREBLE")->load();
+
+    /* Waveshaper */
+    settings.waveshaper = apvts.getRawParameterValue("WAVESHAPER")->load();
+    
+    /* Chorus */
+    settings.chorusRate = apvts.getRawParameterValue("CHORUSRATE")->load();
+    settings.chorusDepth = apvts.getRawParameterValue("CHORUSDEPTH")->load();
+    settings.chorusDelay = apvts.getRawParameterValue("CHORUSDELAY")->load();
+    settings.chorusFeedback = apvts.getRawParameterValue("CHORUSFEEDBACK")->load();
+    settings.chorusMix = apvts.getRawParameterValue("CHORUSMIX")->load();
+    
+    /* Phaser */
+    settings.phaserRate = apvts.getRawParameterValue("PHASERRATE")->load();
+    settings.phaserDepth = apvts.getRawParameterValue("PHASERDEPTH")->load();
+    settings.phaserCentFreq = apvts.getRawParameterValue("PHASERFC")->load();
+    settings.phaserFeedback = apvts.getRawParameterValue("PHASERFEEDBACK")->load();
+    settings.phaserMix = apvts.getRawParameterValue("PHASERMIX")->load();
+    
+    /* Reverb */
+    settings.reverbToggle = apvts.getRawParameterValue("REVERB")->load();
+    settings.verbMix = apvts.getRawParameterValue("VERBMIX")->load();
+    settings.verbRoom = apvts.getRawParameterValue("VERBROOM")->load();
+    settings.verbDamping = apvts.getRawParameterValue("VERBDAMPING")->load();
+    settings.verbWidth = apvts.getRawParameterValue("VERBWIDTH")->load();
+
+    /* Master volume */
+    settings.masterVol = apvts.getRawParameterValue("MASTERVOL")->load();
+
+    /* Convolution */
+    settings.convolution = apvts.getRawParameterValue("CONVOLUTION")->load();
+
+    return settings;
+}
+
+//==============================================================================
+/*
+    Basic Plugin Functions
+ */
+//==============================================================================
+const juce::String AmpSimAudioProcessor::getName() const
+{
+    return JucePlugin_Name;
+}
+
+bool AmpSimAudioProcessor::acceptsMidi() const
+{
+   #if JucePlugin_WantsMidiInput
+    return true;
+   #else
+    return false;
+   #endif
+}
+
+bool AmpSimAudioProcessor::producesMidi() const
+{
+   #if JucePlugin_ProducesMidiOutput
+    return true;
+   #else
+    return false;
+   #endif
+}
+
+bool AmpSimAudioProcessor::isMidiEffect() const
+{
+   #if JucePlugin_IsMidiEffect
+    return true;
+   #else
+    return false;
+   #endif
+}
+
+double AmpSimAudioProcessor::getTailLengthSeconds() const
+{
+    return 0.0;
+}
+
+int AmpSimAudioProcessor::getNumPrograms()
+{
+    return 1;   // NB: some hosts don't cope very well if you tell them there are 0 programs,
+                // so this should be at least 1, even if you're not really implementing programs.
+}
+
+int AmpSimAudioProcessor::getCurrentProgram()
+{
+    return 0;
+}
+
+void AmpSimAudioProcessor::setCurrentProgram (int index)
+{
+}
+
+const juce::String AmpSimAudioProcessor::getProgramName (int index)
+{
+    return {};
+}
+
+void AmpSimAudioProcessor::changeProgramName (int index, const juce::String& newName)
+{
+}
+
+bool AmpSimAudioProcessor::hasEditor() const
+{
+    return true;
+}
+
+juce::AudioProcessorEditor* AmpSimAudioProcessor::createEditor()
+{
+    return new AmpSimAudioProcessorEditor (*this);
+}
+
+void AmpSimAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
+{
+    /* Loads plugin parameter state */
+    juce::MemoryOutputStream mos(destData, true);
+    apvts.state.writeToStream(mos);
+}
+
+void AmpSimAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
+{
+    /* Restores plugin state from memory */
+    auto tree = juce::ValueTree::readFromData(data, sizeInBytes);
+    if (tree.isValid())
+    {
+        apvts.replaceState(tree);
+        updateSettings();
+    }
+}
+
+/* This creates new instances of the plugin */
+juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
+{
+    return new AmpSimAudioProcessor();
+}
+
+void AmpSimAudioProcessor::updateSettings()
+{
+    /* Retrieve slider settings*/
+    ChainSettings settings = getChainSettings(apvts);
+
+    /* Update dsp settings */
+    updateNoiseGate(settings.gateThreshold, settings.gateAttack, settings.gateRelease,
+        settings.gateToggle);
+    updatePreGain(settings.preGain, settings.waveshaper);
+    updateToneStack(settings);
+    updateWaveshaper(settings.waveshaper);
+    updateChorus(settings.chorusRate, settings.chorusDepth, settings.chorusDelay,
+                 settings.chorusFeedback, settings.chorusMix);
+    updatePhaser(settings.phaserRate, settings.phaserDepth, settings.phaserCentFreq,
+                 settings.phaserFeedback, settings.phaserMix);
+    updateReverb(settings.verbMix, settings.verbRoom, settings.verbDamping,
+        settings.verbWidth, settings.reverbToggle);
+    updateMasterVol(settings.masterVol);
+    updateConvolution(settings.convolution);
 }

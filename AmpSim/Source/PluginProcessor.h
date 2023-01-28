@@ -10,26 +10,7 @@
 
 #include <JuceHeader.h>
 
-/* Plugin settings for connecting to UI */
-struct ChainSettings
-{
-    bool gateToggle{ true };
-    float gateThreshold{ 0.0 }, gateAttack{ 0.0 }, gateRelease{ 0.0 };
-    float preGain{ 0.5 };
-    float bassFreq{ 0 }, midGain{ 0 }, trebleFreq{ 0 };
-    float waveshaper{ 1 };
-    float reverbToggle { 1 };
-    float verbMix {0}, verbRoom {0}, verbDamping {0}, verbWidth {0};
-    float masterVol{ 0.5 };
-    float convolution{ 1 };
-    float chorusRate { 1 }, chorusDepth { 1 }, chorusDelay { 1 },
-            chorusFeedback { 1 }, chorusMix { 1 };
-    float phaserRate { 1 }, phaserDepth { 1 }, phaserCentFreq { 1 },
-            phaserFeedback { 1 }, phaserMix { 1 };
-};
-ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts);
-
-/* Chain stage types */
+/* Processor type definitions */
 using NoiseGate = juce::dsp::NoiseGate<float>;
 using Gain = juce::dsp::Gain<float>;
 using WaveShaper = juce::dsp::WaveShaper<float>;
@@ -40,6 +21,30 @@ using ReverbParams = juce::Reverb::Parameters;
 using Convolution = juce::dsp::Convolution;
 using Chorus = juce::dsp::Chorus<float>;
 using Phaser = juce::dsp::Phaser<float>;
+
+/*
+ 
+    Processor Chain Definitions
+ 
+ */
+/* Plugin settings for connecting to UI */
+struct ChainSettings
+{
+    bool gateToggle;
+    float gateThreshold, gateAttack, gateRelease;
+    float preGain;
+    float bassFreq, midGain, trebleFreq;
+    float waveshaper;
+    float reverbToggle;
+    float verbMix, verbRoom, verbDamping, verbWidth;
+    float masterVol;
+    float convolution;
+    float chorusRate, chorusDepth, chorusDelay,
+            chorusFeedback, chorusMix;
+    float phaserRate, phaserDepth, phaserCentFreq,
+            phaserFeedback, phaserMix;
+};
+ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts);
 
 /* Pregain chain setup */
 using InputChain = juce::dsp::ProcessorChain
@@ -56,9 +61,9 @@ enum InputChainPositions
 /* Tone stack setup */
 using ToneStack = juce::dsp::ProcessorChain
 <
-    Filter,
-    Filter,
-    Filter
+    Filter,     // High-pass filter (bass knob)
+    Filter,     // Mid peak (mid knob)
+    Filter      // Low-pass filter (treble knob)
 >;
 enum ToneStackPositions
 {
@@ -71,7 +76,7 @@ enum ToneStackPositions
 /* Amp chain setup */
 using AmpChain = juce::dsp::ProcessorChain
 <
-    WaveShaper
+    WaveShaper  // Waveshaping function (selected amp model)
 >;
 enum AmpChainPositions
 {
@@ -99,9 +104,9 @@ const juce::StringArray LowGainAmps
 };
 const juce::StringArray HighGainAmps
 {
-    "FatMan",
-    "Circle7",
-    "ForkInToaster"
+    "Fat Man",
+    "Circle 7",
+    "Fork In Toaster"
 };
 
 /* Effects loop setup */
@@ -121,8 +126,8 @@ enum EffectsChainPositions
 /* Post effects chain setup */
 using OutputChain = juce::dsp::ProcessorChain
 <
-    Gain,
-    Convolution
+    Gain,       // Master volume knob
+    Convolution // Cabinet selection
 >;
 enum OutputChainPositions
 {
@@ -149,6 +154,7 @@ public:
    #endif
 
     void processBlock (juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
+    void reset() override;
 
     //==============================================================================
     juce::AudioProcessorEditor* createEditor() override;
@@ -183,8 +189,10 @@ private:
     ToneStack leftTone, rightTone;
     AmpChain leftAmp, rightAmp;
     EffectsChain leftEffects, rightEffects;
-//    juce::dsp::ProcessorDuplicator<EffectsChain, > effects;
     OutputChain leftOutput, rightOutput;
+    
+    /* Oversampling properties */
+    juce::dsp::Oversampling<float> oversampler;
     
     /* Noise gate properties*/
     const float gateRatio = 100;
@@ -193,13 +201,7 @@ private:
     const float bassQ = 0.2f, trebleQ = 0.2f, peakQ = 1.f;
     const float peakFc = 600.f;
 
-    /* Directory paths */
-    using File = juce::File;
-    File rootDir;
-    File assetsDir; // not currently used, needs to be defined in setStateInformation() then used
-    int numTries;
-
-    /* UI settings helpers */
+    /* UI setting updaters */
     void updateSettings();
     void updateNoiseGate(float thresh, float att, float rel, bool bypass);
     void updatePreGain(float gainDb, float amp);
