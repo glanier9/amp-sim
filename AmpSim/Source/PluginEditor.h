@@ -34,7 +34,9 @@ private:
     /* Helper Functions */
     std::vector<juce::Component*> getComps();
     std::vector<juce::Component*> getKnobs();
-    juce::Point<float> getInitialWindowSize () const { return juce::Point<float>(1000, 600); }
+    const int pluginW = 1000;
+    const int pluginH = 600;
+    juce::Point<float> getInitialWindowSize () const { return juce::Point<float>(pluginW, pluginH); }
 
     /* Section Labels */
     juce::Label fxLabel1;
@@ -108,8 +110,8 @@ private:
     AmpSimAudioProcessor& audioProcessor;
     
     /* Image */
-    //AmpImage image;
     juce::ImageComponent ampImage;
+    int imageCheck;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AmpSimAudioProcessorEditor)
 };

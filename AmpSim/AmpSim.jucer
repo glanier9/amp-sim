@@ -26,8 +26,6 @@
       <FILE id="T5CD4d" name="EffectModule.cpp" compile="1" resource="0"
             file="Source/EffectModule.cpp"/>
       <FILE id="dEMYyb" name="EffectModule.h" compile="0" resource="0" file="Source/EffectModule.h"/>
-      <FILE id="I60TpP" name="AmpImage.cpp" compile="1" resource="0" file="Source/AmpImage.cpp"/>
-      <FILE id="dr3anP" name="AmpImage.h" compile="0" resource="0" file="Source/AmpImage.h"/>
       <FILE id="NldhIb" name="FxKnob1.cpp" compile="1" resource="0" file="Source/FxKnob1.cpp"/>
       <FILE id="gnIhGA" name="FxKnob1.h" compile="0" resource="0" file="Source/FxKnob1.h"/>
       <FILE id="XOdQKN" name="PopupKnob.cpp" compile="1" resource="0" file="Source/PopupKnob.cpp"/>
@@ -42,6 +40,12 @@
         <FILE id="EjnYWX" name="guitar_amp.wav" compile="0" resource="1" file="Resources/Cabinets/guitar_amp.wav"/>
       </GROUP>
       <GROUP id="{A58C6EC9-33E8-78DE-BB16-E228AC2D85AD}" name="Images">
+        <FILE id="n1QUrC" name="capybara8.jpeg" compile="0" resource="1" file="../../../../Downloads/capybara8.jpeg"/>
+        <FILE id="IW6PxG" name="capybara7.jpeg" compile="0" resource="1" file="../../../../Downloads/capybara7.jpeg"/>
+        <FILE id="xoD4cq" name="capybara6.jpeg" compile="0" resource="1" file="../../../../Downloads/capybara6.jpeg"/>
+        <FILE id="BPS8zM" name="capybara5.jpeg" compile="0" resource="1" file="../../../../Downloads/capybara5.jpeg"/>
+        <FILE id="fHiORU" name="capybara4.jpeg" compile="0" resource="1" file="../../../../Downloads/capybara4.jpeg"/>
+        <FILE id="VFqo9v" name="capybara3.jpeg" compile="0" resource="1" file="../../../../Downloads/capybara3.jpeg"/>
         <FILE id="SQXq1F" name="capybara2.jpeg" compile="0" resource="1" file="../../../../Downloads/capybara2.jpeg"/>
         <FILE id="HJ5Lsa" name="capybara.jpeg" compile="0" resource="1" file="Resources/Images/capybara.jpeg"/>
       </GROUP>

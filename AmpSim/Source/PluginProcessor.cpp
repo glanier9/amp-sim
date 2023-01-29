@@ -167,6 +167,27 @@ bool AmpSimAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) c
 }
 #endif
 
+void AmpSimAudioProcessor::updateSettings()
+{
+    /* Retrieve slider settings*/
+    ChainSettings settings = getChainSettings(apvts);
+
+    /* Update dsp settings */
+    updateNoiseGate(settings.gateThreshold, settings.gateAttack, settings.gateRelease,
+        settings.gateToggle);
+    updatePreGain(settings.preGain, settings.waveshaper);
+    updateToneStack(settings);
+    updateWaveshaper(settings.waveshaper);
+    updateChorus(settings.chorusRate, settings.chorusDepth, settings.chorusDelay,
+                 settings.chorusFeedback, settings.chorusMix);
+    updatePhaser(settings.phaserRate, settings.phaserDepth, settings.phaserCentFreq,
+                 settings.phaserFeedback, settings.phaserMix);
+    updateReverb(settings.verbMix, settings.verbRoom, settings.verbDamping,
+        settings.verbWidth, settings.reverbToggle);
+    updateMasterVol(settings.masterVol);
+    updateConvolution(settings.convolution);
+}
+
 void AmpSimAudioProcessor::updateNoiseGate(float thresh, float att, float rel, bool bypass)
 {
     /* Retrieve stage template */
@@ -756,25 +777,4 @@ void AmpSimAudioProcessor::setStateInformation (const void* data, int sizeInByte
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
     return new AmpSimAudioProcessor();
-}
-
-void AmpSimAudioProcessor::updateSettings()
-{
-    /* Retrieve slider settings*/
-    ChainSettings settings = getChainSettings(apvts);
-
-    /* Update dsp settings */
-    updateNoiseGate(settings.gateThreshold, settings.gateAttack, settings.gateRelease,
-        settings.gateToggle);
-    updatePreGain(settings.preGain, settings.waveshaper);
-    updateToneStack(settings);
-    updateWaveshaper(settings.waveshaper);
-    updateChorus(settings.chorusRate, settings.chorusDepth, settings.chorusDelay,
-                 settings.chorusFeedback, settings.chorusMix);
-    updatePhaser(settings.phaserRate, settings.phaserDepth, settings.phaserCentFreq,
-                 settings.phaserFeedback, settings.phaserMix);
-    updateReverb(settings.verbMix, settings.verbRoom, settings.verbDamping,
-        settings.verbWidth, settings.reverbToggle);
-    updateMasterVol(settings.masterVol);
-    updateConvolution(settings.convolution);
 }

@@ -85,9 +85,6 @@ AmpSimAudioProcessorEditor::AmpSimAudioProcessorEditor (AmpSimAudioProcessor& p)
         (audioProcessor.apvts, "PHASERMIX", effect2.knob2);
     phaserDepthAtt = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>
         (audioProcessor.apvts, "PHASERDEPTH", effect2.knob3);
-    
-    /* Image */
-    // TODO
 
     /* Generate all components */
     for( auto* comp : getComps() )
@@ -103,13 +100,106 @@ AmpSimAudioProcessorEditor::~AmpSimAudioProcessorEditor()
 {
 }
 
+std::vector<juce::Component*> AmpSimAudioProcessorEditor::getComps()
+{
+    return
+    {
+        /* Amp Sliders */
+        &preGainSlider,
+        &bassSlider,
+        &midSlider,
+        &trebleSlider,
+        &masterVolSlider,
+        
+        /* Combo Boxes */
+        &waveShaperCombo,
+        &convolutionCombo,
+        
+        /* FX sections with multiple components */
+        &noiseGate,
+        &reverb,
+        
+        /* Fx 1 */
+        &effect1,
+        
+        /* Fx 2 */
+        &effect2,
+        
+        /* Image */
+        &ampImage
+    };
+}
+
+//==============================================================================
+/*
+    UI Visuals
+ */
 //==============================================================================
 void AmpSimAudioProcessorEditor::paint (juce::Graphics& g)
 {
-    g.setGradientFill(juce::ColourGradient(juce::Colours::yellow, 0, 0,
-                                           juce::Colours::black, getInitialWindowSize().getX(),
-                                           getInitialWindowSize().getY(),
-                                           true));
+    /* Background color based on amp selection*/
+    switch(imageCheck)
+    {
+            /* Low gain amps */
+        case Clean:
+            g.setGradientFill(juce::ColourGradient(juce::Colours::yellow, 0, 0,
+                                                   juce::Colours::black, getInitialWindowSize().getX(),
+                                                   getInitialWindowSize().getY(),
+                                                   true));
+            break;
+            
+        case Asinine:
+            g.setGradientFill(juce::ColourGradient(juce::Colours::green, 0, 0,
+                                                   juce::Colours::black, getInitialWindowSize().getX(),
+                                                   getInitialWindowSize().getY(),
+                                                   true));
+            break;
+            
+        case Reptile:
+            g.setGradientFill(juce::ColourGradient(juce::Colours::blue, 0, 0,
+                                                   juce::Colours::black, getInitialWindowSize().getX(),
+                                                   getInitialWindowSize().getY(),
+                                                   true));
+            break;
+            
+        case Geeky:
+            g.setGradientFill(juce::ColourGradient(juce::Colours::red, 0, 0,
+                                                   juce::Colours::black, getInitialWindowSize().getX(),
+                                                   getInitialWindowSize().getY(),
+                                                   true));
+            break;
+            
+        case SmolCronch:
+            g.setGradientFill(juce::ColourGradient(juce::Colours::brown, 0, 0,
+                                                   juce::Colours::black, getInitialWindowSize().getX(),
+                                                   getInitialWindowSize().getY(),
+                                                   true));
+            break;
+            
+            /* High gain amps */
+        case FatMan:
+            g.setGradientFill(juce::ColourGradient(juce::Colours::purple, 0, 0,
+                                                   juce::Colours::black, getInitialWindowSize().getX(),
+                                                   getInitialWindowSize().getY(),
+                                                   true));
+            break;
+            
+        case Circle7:
+            g.setGradientFill(juce::ColourGradient(juce::Colours::orange, 0, 0,
+                                                   juce::Colours::black, getInitialWindowSize().getX(),
+                                                   getInitialWindowSize().getY(),
+                                                   true));
+            break;
+            
+        case ForkInToaster:
+            g.setGradientFill(juce::ColourGradient(juce::Colours::aqua, 0, 0,
+                                                   juce::Colours::black, getInitialWindowSize().getX(),
+                                                   getInitialWindowSize().getY(),
+                                                   true));
+            break;
+    }
+    
+    /* Fill in whole background */
     g.fillAll();
 }
 
@@ -153,77 +243,67 @@ void AmpSimAudioProcessorEditor::resized()
     ampImage.setBounds(imageArea);
 }
 
-/* 
-    FUNCTIONS NOT CURRENTLY USED
-
-    This was for testing the combo boxes, showing how changing a selection
-    can adjust visual things. Leaving in for future expansion
-*/
+//==============================================================================
+/*
+    UI Listeners
+ */
+//==============================================================================
 void AmpSimAudioProcessorEditor::waveshaperChanged()
 {
-    switch (waveShaperCombo.getSelectedId())
+    imageCheck = waveShaperCombo.indexOfItemId(waveShaperCombo.getSelectedId()) + 1;
+                                               
+    /* Update amp photo */
+    switch (imageCheck)
     {
-    case Clean:
+            /* Low gain amps */
+        case Clean:
             ampImage.setImage(juce::ImageCache::getFromMemory(BinaryData::capybara_jpeg, BinaryData::capybara_jpegSize));
-            //comboBox.setStyleFlags(juce::Font::plain);
             break;
-    case SmolCronch:
+            
+        case Asinine:
             ampImage.setImage(juce::ImageCache::getFromMemory(BinaryData::capybara2_jpeg, BinaryData::capybara2_jpegSize));
             break;
-    case styleItalic:
-            // Nothing for now
-            //waveBoxFont.setStyleFlags(juce::Font::italic);
+            
+        case Reptile:
+            ampImage.setImage(juce::ImageCache::getFromMemory(BinaryData::capybara3_jpeg, BinaryData::capybara3_jpegSize));
             break;
-    default: 
+            
+        case Geeky:
+            ampImage.setImage(juce::ImageCache::getFromMemory(BinaryData::capybara4_jpeg, BinaryData::capybara4_jpegSize));
+            break;
+            
+        case SmolCronch:
+            ampImage.setImage(juce::ImageCache::getFromMemory(BinaryData::capybara5_jpeg, BinaryData::capybara5_jpegSize));
+            break;
+            
+            /* High gain amps*/
+        case FatMan:
+            ampImage.setImage(juce::ImageCache::getFromMemory(BinaryData::capybara6_jpeg, BinaryData::capybara6_jpegSize));
+            break;
+            
+        case Circle7:
+            ampImage.setImage(juce::ImageCache::getFromMemory(BinaryData::capybara7_jpeg, BinaryData::capybara7_jpegSize));
+            break;
+            
+        case ForkInToaster:
+            ampImage.setImage(juce::ImageCache::getFromMemory(BinaryData::capybara8_jpeg, BinaryData::capybara8_jpegSize));
             break;
     }
-    //waveBoxLabel.setFont(waveBoxFont);
+    
+    /* Update background */
+    repaint();
 }
 void AmpSimAudioProcessorEditor::convolutionChanged()
 {
     switch (convolutionCombo.getSelectedId())
     {
     case stylePlain:
-        //convoBoxFont.setStyleFlags(juce::Font::plain);
         break;
     case styleBold:
-        //convoBoxFont.setStyleFlags(juce::Font::bold);
         break;
     case styleItalic:
-        //convoBoxFont.setStyleFlags(juce::Font::italic);
         break;
     default:
         break;
     }
-    //convoBoxLabel.setFont(convoBoxFont);
-}
-
-std::vector<juce::Component*> AmpSimAudioProcessorEditor::getComps()
-{
-    return
-    {
-        /* Amp Sliders */
-        &preGainSlider,
-        &bassSlider,
-        &midSlider,
-        &trebleSlider,
-        &masterVolSlider,
-        
-        /* Combo Boxes */
-        &waveShaperCombo,
-        &convolutionCombo,
-        
-        /* FX sections with multiple components */
-        &noiseGate,
-        &reverb,
-        
-        /* Fx 1 */
-        &effect1,
-        
-        /* Fx 2 */
-        &effect2,
-        
-        /* Image */
-        &ampImage
-    };
 }
