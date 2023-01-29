@@ -21,6 +21,7 @@ using ReverbParams = juce::Reverb::Parameters;
 using Convolution = juce::dsp::Convolution;
 using Chorus = juce::dsp::Chorus<float>;
 using Phaser = juce::dsp::Phaser<float>;
+using Limiter = juce::dsp::Limiter<float>;
 
 /*
  
@@ -127,11 +128,13 @@ enum EffectsChainPositions
 using OutputChain = juce::dsp::ProcessorChain
 <
     Gain,       // Master volume knob
+    Limiter,
     Convolution // Cabinet selection
 >;
 enum OutputChainPositions
 {
     MasterVol,
+    LimitOut,
     Cabinet
 };
 

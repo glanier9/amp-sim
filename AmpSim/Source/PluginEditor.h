@@ -14,7 +14,6 @@
 #include "SelectionBox.h"
 #include "KnobWithToggle.h"
 #include "EffectModule.h"
-#include "AmpImage.h"
 
 //==============================================================================
 /**

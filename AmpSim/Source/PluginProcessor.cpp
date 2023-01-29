@@ -49,7 +49,13 @@ void AmpSimAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock
     spec.maximumBlockSize = samplesPerBlock;
     spec.numChannels = 1;   // Each stereo channel is being processed individually
     spec.sampleRate = sampleRate;
-
+    
+    /* Set up output limiter */
+    auto& leftLimit = leftOutput.template get<OutputChainPositions::LimitOut>();
+    auto& rightLimit = rightOutput.template get<OutputChainPositions::LimitOut>();
+    leftLimit.setThreshold(0.0f); rightLimit.setThreshold(0.0f);
+    leftLimit.setRelease(0.0f); rightLimit.setRelease(0.0f);
+    
     /* Get DSP values from UI */
     updateSettings();
 
@@ -293,7 +299,6 @@ void AmpSimAudioProcessor::updateWaveshaper(float shapeSelect)
     
             /* Clean amp, no waveshaping */
         case Clean:
-            /* No waveshaping function */
             leftWaveShape.functionToUse = [](float x) {
                 return x;
             };
@@ -305,20 +310,22 @@ void AmpSimAudioProcessor::updateWaveshaper(float shapeSelect)
             /* Soft clippers, low gain */
         case Asinine:       // Asymptotic
             leftWaveShape.functionToUse = [](float x) {
-                return x/(abs(x) + 1);
+                return x/(abs(x) + 1.0f);
             };
             rightWaveShape.functionToUse = [](float x) {
-                return x/(abs(x) + 1);
+                return x/(abs(x) + 1.0f);
             };
             break;
+            
         case Reptile:       // Scaled arctan
             leftWaveShape.functionToUse = [](float x) {
-                return (2.f/juce::MathConstants<float>::pi) * std::atan(x * juce::MathConstants<float>::halfPi);
+                return (2.0f/juce::MathConstants<float>::pi) * std::atan(x * juce::MathConstants<float>::halfPi);
             };
             rightWaveShape.functionToUse = [](float x) {
-                return (2.f/juce::MathConstants<float>::pi) * std::atan(x * juce::MathConstants<float>::halfPi);
+                return (2.0f/juce::MathConstants<float>::pi) * std::atan(x * juce::MathConstants<float>::halfPi);
             };
             break;
+            
         case Geeky:         // Algebraic
             leftWaveShape.functionToUse = [](float x) {
                 return x/(sqrt(1 + pow(x, 2.f)));
@@ -327,6 +334,7 @@ void AmpSimAudioProcessor::updateWaveshaper(float shapeSelect)
                 return x/(sqrt(1 + pow(x, 2.f)));
             };
             break;
+            
         case SmolCronch:    // Hyperbolic tangent
             leftWaveShape.functionToUse = [](float x) {
                 return std::tanh(x);
@@ -338,63 +346,53 @@ void AmpSimAudioProcessor::updateWaveshaper(float shapeSelect)
             
             /* Hard clippers, high gain*/
         case FatMan:        // Polynomail
-            leftWaveShape.functionToUse = [](float x)
-            {
-                if (x > -1.f)
-                {
-                    if (x < 1)
-                        return ( (3.f/2.f)*x - (1.f/2.f)*pow(x, 3.f) );
-                    else
-                        return 1.f;
-                }
+            leftWaveShape.functionToUse = [](float x){
+                if (x >= -1.0f && x <= 1.0f)
+                    return  (3.0f/2.f)*x - (10.f/20.f)*pow(x, 3.0f);
                 else
-                    return -1.f;
+                    return juce::jlimit(-1.0f, 1.0f, x);
             };
-            rightWaveShape.functionToUse = [](float x)
-            {
-                if (x > -1.f)
-                {
-                    if (x < 1)
-                        return ( (3.f/2.f)*x - (1.f/2.f)*pow(x, 3.f) );
-                    else
-                        return 1.f;
-                }
+            rightWaveShape.functionToUse = [](float x){
+                if (x >= -1.0f && x <= 1.0f)
+                    return  (3.0f/2.f)*x - (10.f/20.f)*pow(x, 3.0f);
                 else
-                    return -1.f;
+                    return juce::jlimit(-1.0f, 1.0f, x);
             };
             break;
-        case Circle7:
+        case Circle7:       // Line 6 patent
             leftWaveShape.functionToUse = [](float x) {
-                if (x > -0.08905f)
+                if (x >= -1.0f && x <= 1.0f)
                 {
-                    if (x < 0.320018f)
+                    if (x < -0.08905)
+                        return (-3.f/4.f)*( 1.f - pow(1.f - (abs(x) - 0.032847f), 12.f) + (1.f/3.f)*(abs(x) - 0.032847f)) + 0.01f;
+                    else if ( x < 0.320018f)
                         return -6.153f*pow(x, 2.f) + 3.9375f*x;
                     else
                         return 0.630035f;
                 }
                 else
-                    return (-3.f/4.f)*( 1.f - pow(1.f - (abs(x) - 0.032847f), 12.f) + (1.f/3.f)*(abs(x) - 0.032847f)) + 0.01f;
+                    return juce::jlimit(-1.0f, 1.0f, x);
             };
             rightWaveShape.functionToUse = [](float x) {
-                if (x > -0.08905f)
+                if (x >= -1.0f && x <= 1.0f)
                 {
-                    if (x < 0.320018f)
+                    if (x < -0.08905)
+                        return (-3.f/4.f)*( 1.f - pow(1.f - (abs(x) - 0.032847f), 12.f) + (1.f/3.f)*(abs(x) - 0.032847f)) + 0.01f;
+                    else if ( x < 0.320018f)
                         return -6.153f*pow(x, 2.f) + 3.9375f*x;
                     else
                         return 0.630035f;
                 }
                 else
-                    return (-3.f/4.f)*( 1.f - pow(1.f - (abs(x) - 0.032847f), 12.f) + (1.f/3.f)*(abs(x) - 0.032847f)) + 0.01f;
+                    return juce::jlimit(-1.0f, 1.0f, x);
             };
             break;
         case ForkInToaster: // Basic hard clipper
-            leftWaveShape.functionToUse = [](float x)
-            {
-                return juce::jlimit(float(-1), float(1), x);
+            leftWaveShape.functionToUse = [](float x){
+                return juce::jlimit(-1.0f, 1.0f, x);
             };
-            rightWaveShape.functionToUse = [](float x)
-            {
-                return juce::jlimit(float(-1), float(1), x);
+            rightWaveShape.functionToUse = [](float x){
+                return juce::jlimit(-1.0f, 1.0f, x);
             };
             break;
         }
