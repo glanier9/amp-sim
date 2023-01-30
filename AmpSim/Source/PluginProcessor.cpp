@@ -27,7 +27,7 @@ AmpSimAudioProcessor::AmpSimAudioProcessor()
                        ),
     /* Initialize members */
     apvts(*this, nullptr, "Parameters", createParamLayout()),
-    oversampler(2, 3, juce::dsp::Oversampling<float>::FilterType::filterHalfBandPolyphaseIIR)
+    oversampler(2, 3, juce::dsp::Oversampling<float>::FilterType::filterHalfBandFIREquiripple)
 #endif
 {
     
@@ -548,10 +548,8 @@ juce::AudioProcessorValueTreeState::ParameterLayout AmpSimAudioProcessor::create
             25.f));
 
     /* Pregain */
-//    layout.add(std::make_unique<juce::AudioParameterFloat>
-//        ("GAIN", "Gain", 50.f, 80.f, 65.f));
     layout.add(std::make_unique<juce::AudioParameterFloat>
-        ("GAIN", "Gain", 0.f, 100.f, 50.f));
+        ("GAIN", "Gain", 25.f, 50.f, 40.f));
 
     /* EQ filters */
     layout.add(std::make_unique<juce::AudioParameterFloat>
