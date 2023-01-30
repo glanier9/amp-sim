@@ -1,12 +1,12 @@
-# GAE AmpSim
+# JUCE Amp Sim
 Gregory Lanier  
-GT ECE 4808 GAE  
-Spring 2022
+Georgia Tech Retrofuturistic Hardware VIP + ECE 4808 GAE
+Spring 2022- Spring 2023
 <br/><br/>
 ![Plugin Image](Assets/plugin-image.png)
 
 ## Overview
-&nbsp;&nbsp;&nbsp;&nbsp;This is a plugin made for Dr. Lanterman's 4803 GAE (Guitar Amplificaiton and Effects) class. The plugin is meant to be a simulator for a guitar amplifier with a couple of effects.
+&nbsp;&nbsp;&nbsp;&nbsp;This is a plugin originally made for Dr. Aaron Lanterman's 4803 GAE (Guitar Amplificaiton and Effects) class. Development continued over the following year through the RFHW VIP. The plugin is meant to be a simulator for a guitar amplifier with a couple of effects.
 
 ## Installation
 ### Option 1: Installers
@@ -52,7 +52,7 @@ Also copy the "Assets/AmpSim" folder (not "Assets", must copy "AmpSim" and all c
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Frequency: 60 to 318 Hz  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Q: 0.2  
 #### ***Mid***
-&nbsp;&nbsp;&nbsp;&nbsp;The mid slider controls a peak filter's gain. It is at a set frequency to emulate the mid-scoop sound of a hardware tone stack.  
+&nbsp;&nbsp;&nbsp;&nbsp;The mid slider controls a peak filter's gain. It is at a set frequency to emulate the mid-scoop sound of a hardware tone stack. 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Frequency: 600 Hz   
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Peak: -24 to 0 dB    
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Q: 0.1  
@@ -63,6 +63,8 @@ Also copy the "Assets/AmpSim" folder (not "Assets", must copy "AmpSim" and all c
 
 ### Amp Chain
 &nbsp;&nbsp;&nbsp;&nbsp;The amp chain aims to preform any waveshaping that is typical of a hardware amplifier. Currently, there is only a function-based waveshaper, but other components like a dc offset can be inserted into the chain for more depth and control.  
+#### ***Oversampler***
+&nbsp;&nbsp;&nbsp;&nbsp;ADD DESCRIPTION
 #### ***Waveshaper***
 &nbsp;&nbsp;&nbsp;&nbsp;This stage is defined by a lambda function that loops through the samples for waveshaping purposes. Each amp name has a different algorithm used. These are categorized into low-gain and high-gain based on the clipping type, though, currently, the low-gain amps can still get pretty crunchy in the top 1/4 of the gain dial. There is also a clean option set as the default amp.  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Squeaky Clean: f(x) = x  
@@ -78,12 +80,16 @@ Also copy the "Assets/AmpSim" folder (not "Assets", must copy "AmpSim" and all c
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Fat Man: if -1 < x < 1, f(x) = (3/2)*x - (1/2)*x^3; -1 or 1 otherwise  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Polynomial hard clipper. Very deep sounding.  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Circle 7: Very complex mathematical condition from the Line 6 patent  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;THIS AMP DOES NOT WORK!!! I couldn't figure out why after a while of debugging. I would really like to get this at some point.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Fork in Toaster: if -1 < x < 1, f(x) = x; -1 or 1 otherwise  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Classic hard clipper set to a max of 1.  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Classic hard clipper set to a max of +/- 1.  
 
 ### Effects Chain
-&nbsp;&nbsp;&nbsp;&nbsp;This chain is processed after the Amp Chain and is meant to mimic an effects loop on a hardware amp.  
+&nbsp;&nbsp;&nbsp;&nbsp;This chain is processed after the Amp Chain and is meant to mimic an effects loop on a hardware amp.
+#### ***Chorus***
+&nbsp;&nbsp;&nbsp;&nbsp;ADD DESCRIPTION
+#### ***Phaser***
+&nbsp;&nbsp;&nbsp;&nbsp;ADD DESCRIPTION
 #### ***Reverb***
 &nbsp;&nbsp;&nbsp;&nbsp;This is a classic reverb with 4 controls. The mix is more of a full transition away from the dry output, which could probably be improved.  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Mix: 0 to 1 wet/dry level  
@@ -96,6 +102,8 @@ Also copy the "Assets/AmpSim" folder (not "Assets", must copy "AmpSim" and all c
 #### ***Master Volume***
 &nbsp;&nbsp;&nbsp;&nbsp;Decibel gain level setting to compensate from the increased pregain. Meant to avoid clipping in a DAW.  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Gain: -40 to -20 dB  
+#### ***Limiter***
+&nbsp;&nbsp;&nbsp;&nbsp;ADD DESCRIPTION
 #### ***Cabinet (Convolution)***
 &nbsp;&nbsp;&nbsp;&nbsp;This stage uses convolution to mimic the effect a cabinet and microphone would have on a guitar's tone. It generally adds more of a full body to the sound. Currently, there are only two settings: one for a guitar cabinet, and one to sound like it is being run through a tape recorder.  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Guitar Amp  
@@ -104,10 +112,10 @@ Also copy the "Assets/AmpSim" folder (not "Assets", must copy "AmpSim" and all c
   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Very tingey and old-school.  
 
 ## Current Progress
-&nbsp;&nbsp;&nbsp;&nbsp;Everything visible in the plugin is fully tested and operational outside of the Circle 7 amp. The chain-of-chains method could be scrapped if no other types of processing in between steps are intended, or the chain system could be scrapped for individual process() calls. Overall, I'm very happy with what I got done with the time I was given :).
+&nbsp;&nbsp;&nbsp;&nbsp;All basic audio processing has been implemented. UI elements are ready to change according to amp and cabinet settings (outline is there and proved working). I still want to add advanced settings menus for Chorus and Phasers, but I havenn't figured out how to put sliders inside of popup menus (or if its possible). If I can't figure it out, then I'll just add one extra parameter for each effect. Looking to add a graphic for each amp (even if its just color changes for 1 or 2 different graphics) as well as possibilities to change some kind of graphic for different cabinet types. Not certain on the general graphic design as well.
   
 ## Intended Additions
-&nbsp;&nbsp;&nbsp;&nbsp;The sections above highlight specific details that need to be improved, such as the operation of the Circle 7 amp and tweaking some knobs like the treble and reverb mix. I intended to put a delay module in the effects chain, but I didn't have time to completely rework the UI as I mentioned above, which would have been required given the insanity that the slider-attached labels create. That would be the first step I'd take for additions. I also left room for at least one more module, such as a phasor. It's also possible to replace the generic UI with other component views, which I would follow up with. From there, I would come back and tweak everything else from a meticulous view.  
+&nbsp;&nbsp;&nbsp;&nbsp;All settings knobs should be tweaked. Advanced menus are trying to be implemented. From there, it is finishing up all the graphical elements. Possible companion app for IOS can be built in order to change settings.  
 
 ## References
 [The Audio Programmer](https://www.youtube.com/c/TheAudioProgrammer)  
