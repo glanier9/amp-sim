@@ -75,8 +75,7 @@ void AmpKnobRotarySlider::paint(juce::Graphics &g)
     getLookAndFeel().drawRotarySlider(g,
                                       sliderBounds.getX(), sliderBounds.getY(),
                                       sliderBounds.getWidth(), sliderBounds.getHeight(),
-                                      jmap(getValue(), range.getStart(), range.getEnd(),
-                                           0.0, 1.0),
+                                      valueToProportionOfLength(getValue()),
                                       startAngle, endAngle,
                                       *this);
     

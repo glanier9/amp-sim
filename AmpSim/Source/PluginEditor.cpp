@@ -24,6 +24,15 @@ AmpSimAudioProcessorEditor::AmpSimAudioProcessorEditor (AmpSimAudioProcessor& p)
     convolutionCombo.lnf.outsideLabels.add({0.f, "Cabinet"});
     noiseGate.labels.add({0.f, "Noise Gate"});
     reverb.labels.add({0.f, "Reverb"});
+    effect1.labels.add({0.f, "Chorus"});
+    effect1.labels.add({1.f, "Mix"});
+    effect1.labels.add({2.f, "Rate"});
+    effect1.labels.add({3.f, "Depth"});
+    effect1.labels.add({4.f, "Delay"});
+    effect2.labels.add({0.f, "Phaser"});
+    effect2.labels.add({1.f, "Mix"});
+    effect2.labels.add({2.f, "Rate"});
+    effect2.labels.add({3.f, "Depth"});
     
     /* Amp section sliders */
     preGainAtt = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>
@@ -50,10 +59,11 @@ AmpSimAudioProcessorEditor::AmpSimAudioProcessorEditor (AmpSimAudioProcessor& p)
     
     /* Cabinet (convolution) comobo box */
     addAndMakeVisible(convolutionCombo);
+    convolutionCombo.addItem("No Cabinet", 1);
     convolutionCombo.addSectionHeading("Amp Cabinets");
-    convolutionCombo.addItem("Cabinet", 1);
+    convolutionCombo.addItem("Cabinet", 2);
     convolutionCombo.addSectionHeading("Special");
-    convolutionCombo.addItem("Cassette", 2);
+    convolutionCombo.addItem("Cassette", 3);
     convolutionCombo.onChange = [this] { convolutionChanged(); };
     convolutionAtt = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment>
         (audioProcessor.apvts, "CONVOLUTION", convolutionCombo);
@@ -71,20 +81,25 @@ AmpSimAudioProcessorEditor::AmpSimAudioProcessorEditor (AmpSimAudioProcessor& p)
         (audioProcessor.apvts, "REVERB", reverb.button);
     
     /* Chorus */
-    chorusRateAtt = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>
-        (audioProcessor.apvts, "CHORUSRATE", effect1.knob1);
     chorusMixAtt = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>
-        (audioProcessor.apvts, "CHORUSMIX", effect1.knob2);
+        (audioProcessor.apvts, "CHORUSMIX", effect1.knob1);
+    chorusRateAtt = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>
+        (audioProcessor.apvts, "CHORUSRATE", effect1.knob2);
     chorusDepthAtt = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>
         (audioProcessor.apvts, "CHORUSDEPTH", effect1.knob3);
+    chorusDelayAtt = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>
+        (audioProcessor.apvts, "CHORUSDELAY", effect1.knob4);
+    
     
     /* Effect 2 */
-    phaserRateAtt = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>
-        (audioProcessor.apvts, "PHASERRATE", effect2.knob1);
     phaserMixAtt = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>
-        (audioProcessor.apvts, "PHASERMIX", effect2.knob2);
+    (audioProcessor.apvts, "PHASERMIX", effect2.knob1);
+    phaserRateAtt = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>
+        (audioProcessor.apvts, "PHASERRATE", effect2.knob2);
     phaserDepthAtt = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>
         (audioProcessor.apvts, "PHASERDEPTH", effect2.knob3);
+//    phaserFcAtt = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>
+//        (audioProcessor.apvts, "PHASERFC", *(effect2.menuKnob1.get()));
 
     /* Generate all components */
     for( auto* comp : getComps() )

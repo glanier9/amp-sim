@@ -27,7 +27,7 @@ AmpSimAudioProcessor::AmpSimAudioProcessor()
                        ),
     /* Initialize members */
     apvts(*this, nullptr, "Parameters", createParamLayout()),
-    oversampler(2, 3, juce::dsp::Oversampling<float>::FilterType::filterHalfBandFIREquiripple)
+    oversampler(2, 4, juce::dsp::Oversampling<float>::FilterType::filterHalfBandPolyphaseIIR)
 #endif
 {
     
@@ -125,11 +125,17 @@ void AmpSimAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
     leftEffects.process(leftEffectsContext); rightEffects.process(rightEffectsContext);
     
     /* Process output chain */
+    ChainSettings settings = getChainSettings(apvts);
     juce::dsp::AudioBlock<float> outputBlock(buffer);
     leftBlock = outputBlock.getSingleChannelBlock(0);
     rightBlock = outputBlock.getSingleChannelBlock(1);
     juce::dsp::ProcessContextReplacing<float> leftOutputContext(leftBlock);
     juce::dsp::ProcessContextReplacing<float> rightOutputContext(rightBlock);
+    if (settings.convolution == 1)
+    {
+        leftOutputContext.isBypassed = true;
+        rightOutputContext.isBypassed = true;
+    }
     leftOutput.process(leftOutputContext); rightOutput.process(rightOutputContext);
 }
 
@@ -285,6 +291,11 @@ void AmpSimAudioProcessor::updateTrebleTone(float freq)
         makeLowPass(getSampleRate(), freq, trebleQ);
     rightTreble.coefficients = juce::dsp::IIR::Coefficients<float>::
         makeLowPass(getSampleRate(), freq, trebleQ);
+    
+//    leftTreble.coefficients = juce::dsp::IIR::Coefficients<float>::
+//        makeHighShelf(getSampleRate(), 1700.f, trebleQ, freq);
+//    rightTreble.coefficients = juce::dsp::IIR::Coefficients<float>::
+//        makeHighShelf(getSampleRate(), 1700.f, trebleQ, freq);
 }
 
 void AmpSimAudioProcessor::updateWaveshaper(float shapeSelect)
@@ -491,29 +502,47 @@ void AmpSimAudioProcessor::updateConvolution(float cabinetSelect)
     switch ((int)cabinetSelect)
     {
     case 1:
+        /* No amp cabinet */
+//        leftCabinet.loadImpulseResponse(BinaryData::guitar_amp_wav,
+//                                        BinaryData::guitar_amp_wavSize,
+//                                        juce::dsp::Convolution::Stereo::no,
+//                                        juce::dsp::Convolution::Trim::no,
+//                                        1024,
+//                                        juce::dsp::Convolution::Normalise::yes);
+//        rightCabinet.loadImpulseResponse(BinaryData::guitar_amp_wav,
+//                                        BinaryData::guitar_amp_wavSize,
+//                                        juce::dsp::Convolution::Stereo::no,
+//                                        juce::dsp::Convolution::Trim::no,
+//                                        1024,
+//                                         juce::dsp::Convolution::Normalise::yes);
+        break;
+    case 2:
         /* Guitar amp cabinet */
         leftCabinet.loadImpulseResponse(BinaryData::guitar_amp_wav,
                                         BinaryData::guitar_amp_wavSize,
-                                        juce::dsp::Convolution::Stereo::yes,
+                                        juce::dsp::Convolution::Stereo::no,
                                         juce::dsp::Convolution::Trim::no,
-                                        1024);
+                                        1024,
+                                        juce::dsp::Convolution::Normalise::yes);
         rightCabinet.loadImpulseResponse(BinaryData::guitar_amp_wav,
-                                        BinaryData::guitar_amp_wavSize,
-                                        juce::dsp::Convolution::Stereo::yes,
-                                        juce::dsp::Convolution::Trim::no,
-                                        1024);
+                                         BinaryData::guitar_amp_wavSize,
+                                         juce::dsp::Convolution::Stereo::no,
+                                         juce::dsp::Convolution::Trim::no,
+                                         1024,
+                                         juce::dsp::Convolution::Normalise::yes);
         break;
-    case 2:
+    case 3:
         leftCabinet.loadImpulseResponse(BinaryData::cassette_recorder_wav,
                                         BinaryData::cassette_recorder_wavSize,
-                                        juce::dsp::Convolution::Stereo::yes,
+                                        juce::dsp::Convolution::Stereo::no,
                                         juce::dsp::Convolution::Trim::no,
-                                        1024);
+                                        1024,                                        juce::dsp::Convolution::Normalise::yes);
         rightCabinet.loadImpulseResponse(BinaryData::cassette_recorder_wav,
                                         BinaryData::cassette_recorder_wavSize,
-                                        juce::dsp::Convolution::Stereo::yes,
+                                        juce::dsp::Convolution::Stereo::no,
                                         juce::dsp::Convolution::Trim::no,
-                                        1024);
+                                        1024,
+                                         juce::dsp::Convolution::Normalise::yes);
         break;
     }
 }
@@ -554,33 +583,37 @@ juce::AudioProcessorValueTreeState::ParameterLayout AmpSimAudioProcessor::create
     /* EQ filters */
     layout.add(std::make_unique<juce::AudioParameterFloat>
         ("BASS", "Bass",
-            juce::NormalisableRange<float>(-318.f, -60.f, 1.f, 1.f), // Range
-            -189.f)); // Default value
+            juce::NormalisableRange<float>(-318.f, -30.f, 1.f, 1.f), // Range
+            -400.f)); // Default value
     layout.add(std::make_unique<juce::AudioParameterFloat>
         ("MID", "Mid",
-            juce::NormalisableRange<float>(-24.f, 0.f, 0.1f, 1.f),
-            -12.5f));
+            juce::NormalisableRange<float>(-12.f, 12.f, 0.05f, 1.f),
+            0.f));
     layout.add(std::make_unique<juce::AudioParameterFloat>
         ("TREBLE", "Treble",
-            juce::NormalisableRange<float>(800.f, 2500.f, 1.f, 1.f),
+            juce::NormalisableRange<float>(800.f, 5000.f, 1.f, 1.f),
             1700.f));
+//    layout.add(std::make_unique<juce::AudioParameterFloat>
+//        ("TREBLE", "Treble",
+//            juce::NormalisableRange<float>(0.1f, 10.f, 0.05f, 0.29f, false),
+//            1.f));
 
     /* Waveshaper */
     layout.add(std::make_unique<juce::AudioParameterFloat>
         ("WAVESHAPER", "Waveshaper", 1.0f, (float)AmpCount - 1.f,
-            1.0f));
+            1.f));
     
     /* Chorus */
     layout.add(std::make_unique<juce::AudioParameterFloat>
-       ("CHORUSRATE", "Chorus Rate", 1.f, 10.f, 5.f));
+       ("CHORUSRATE", "Chorus Rate", 0.f, 3.f, 1.f));
     layout.add(std::make_unique<juce::AudioParameterFloat>
-       ("CHORUSDEPTH", "Chorus Depth", 0.f, 1.f, 0.5f));
+       ("CHORUSDEPTH", "Chorus Depth", 0.f, 1.f, 0.2f));
     layout.add(std::make_unique<juce::AudioParameterFloat>
-       ("CHORUSDELAY", "Chorus Delay", 1.f, 100.f, 50.f));
+       ("CHORUSDELAY", "Chorus Delay", 1.f, 99.f, 8.f));
     layout.add(std::make_unique<juce::AudioParameterFloat>
-       ("CHORUSFEEDBACK", "Chorus Feedback", -1.f, 1.f, 0.f));
+       ("CHORUSFEEDBACK", "Chorus Feedback", -1.f, 1.f, -0.5f));
     layout.add(std::make_unique<juce::AudioParameterFloat>
-       ("CHORUSMIX", "Chorus Mix", 0.f, 1.f, 0.5f));
+       ("CHORUSMIX", "Chorus Mix", 0.f, 1.f, 0.f));
     
     /* Phaser */
     layout.add(std::make_unique<juce::AudioParameterFloat>
@@ -592,7 +625,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout AmpSimAudioProcessor::create
     layout.add(std::make_unique<juce::AudioParameterFloat>
        ("PHASERFEEDBACK", "Phaser Feedback", -1.f, 1.f, 0.f));
     layout.add(std::make_unique<juce::AudioParameterFloat>
-       ("PHASERMIX", "Phaser Mix", 0.f, 1.f, 0.5f));
+       ("PHASERMIX", "Phaser Mix", 0.f, 1.f, 0.f));
     
     /* Reverb */
     layout.add(std::make_unique<juce::AudioParameterBool>
@@ -618,8 +651,8 @@ juce::AudioProcessorValueTreeState::ParameterLayout AmpSimAudioProcessor::create
 
     /* Cabinet */
     layout.add(std::make_unique<juce::AudioParameterFloat>
-        ("CONVOLUTION", "Cabinet", 1.f, 2.f,
-            1.f));
+        ("CONVOLUTION", "Cabinet", 1.f, 3.f,
+            2.f));
 
     return(layout);
 }

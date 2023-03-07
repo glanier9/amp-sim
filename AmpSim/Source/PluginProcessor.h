@@ -201,7 +201,7 @@ private:
     const float gateRatio = 100;
     
     /* Tone stack properties */
-    const float bassQ = 0.2f, trebleQ = 0.2f, peakQ = 1.f;
+    const float bassQ = 0.3f, trebleQ = 0.3f, peakQ = 5.f;
     const float peakFc = 600.f;
 
     /* UI setting updaters */

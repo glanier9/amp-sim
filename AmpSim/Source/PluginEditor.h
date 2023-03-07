@@ -90,27 +90,29 @@ private:
     
     /* Effect 1 */
     EffectModule effect1;
-    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> chorusRateAtt;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> chorusMixAtt;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> chorusRateAtt;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> chorusDepthAtt;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> chorusDelayAtt;
     
     /* Effect 2 */
     EffectModule effect2;
-    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> phaserRateAtt;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> phaserMixAtt;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> phaserRateAtt;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> phaserDepthAtt;
+//    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> phaserFcAtt;
 
     /* Convolution combo box */
     SelectionBox convolutionCombo;
     std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment> convolutionAtt;
     void convolutionChanged();
-
-    /* Referenced audio processor */
-    AmpSimAudioProcessor& audioProcessor;
     
     /* Image */
     juce::ImageComponent ampImage;
     int imageCheck;
+    
+    /* Referenced audio processor */
+    AmpSimAudioProcessor& audioProcessor;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AmpSimAudioProcessorEditor)
 };
