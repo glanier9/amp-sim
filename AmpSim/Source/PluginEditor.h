@@ -109,6 +109,7 @@ private:
     
     /* Image */
     juce::ImageComponent ampImage;
+    juce::Path waveShapePath;
     int imageCheck;
     
     /* Referenced audio processor */

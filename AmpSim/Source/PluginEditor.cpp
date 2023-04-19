@@ -152,15 +152,42 @@ std::vector<juce::Component*> AmpSimAudioProcessorEditor::getComps()
 //==============================================================================
 void AmpSimAudioProcessorEditor::paint (juce::Graphics& g)
 {
+    auto functionCenterX = (float)ampImage.getX() + ampImage.getHeight()/2.f;
+    auto functionCenterY = ampImage.getHeight()/2.f;
+    auto functionQuadrantWidth = ampImage.getHeight()/2.f; auto functionHeight = ampImage.getHeight();
+    auto functionWidth = (float)ampImage.getHeight();
+    auto waveshapeThicc = 2.f;
+    
+    waveShapePath.clear();
+    
+//    waveShapePath.startNewSubPath(ampImage.getX(), ampImage.getHeight()/2.f);
+//    waveShapePath.startNewSubPath(0, getHeight()/2.f);
+
+    
     /* Background color based on amp selection*/
     switch(imageCheck)
     {
             /* Low gain amps */
         case Clean:
+            
             g.setGradientFill(juce::ColourGradient(juce::Colours::yellow, 0, 0,
                                                    juce::Colours::black, getInitialWindowSize().getX(),
                                                    getInitialWindowSize().getY(),
                                                    true));
+            
+            // Waveshaping: y = x
+            waveShapePath.startNewSubPath(functionCenterX, functionCenterY); // Pixel where the path starts
+            for (auto x = 1.f; x <= functionQuadrantWidth; ++x)
+            {
+                waveShapePath.lineTo(functionCenterX + x,
+                                     functionCenterY -
+                                     x); // Positive Input
+                waveShapePath.lineTo(functionCenterX - x,
+                                     functionCenterY +
+                                     x); // Negative Input
+
+            }
+            
             break;
             
         case Asinine:
@@ -168,6 +195,52 @@ void AmpSimAudioProcessorEditor::paint (juce::Graphics& g)
                                                    juce::Colours::black, getInitialWindowSize().getX(),
                                                    getInitialWindowSize().getY(),
                                                    true));
+            
+            // Waveshaping: x/(abs(x) + 1.0f)
+            waveShapePath.startNewSubPath(functionCenterX, functionCenterY); // Pixel where the path starts
+//            for (auto x = 1.f; x < functionQuadrantWidth; ++x)
+//            {
+//                auto input = x/functionQuadrantWidth;
+//                waveShapePath.lineTo(functionCenterX + x, // Positive Input
+//                                     functionCenterY -
+//                                     functionQuadrantWidth*(input/(abs(input) + 1.0f)));
+//
+//            }
+            
+            for (auto x = 1.f; x <= functionWidth; ++x)
+            {
+                auto input = x/functionQuadrantWidth;
+                waveShapePath.lineTo(functionCenterX + x, // Positive Input
+                                     functionCenterY -
+                                     functionQuadrantWidth*(input/(abs(input) + 1.0f)));
+
+            }
+            
+            
+            
+            
+            
+            
+            
+//            waveShapePath.startNewSubPath(functionCenterX, functionCenterY); // Pixel where the path starts
+//            waveShapePath.startNewSubPath(functionCenterX, functionCenterY); // Pixel where the path starts
+//            for (auto x = -1.f; x < -1*functionQuadrantWidth; ++x)
+//            {
+//                auto input = x/functionQuadrantWidth;
+//                waveShapePath.lineTo(functionCenterX + x, // Negative Input
+//                                     functionCenterY +
+//                                     functionQuadrantWidth*(input/(abs(input) + 1.0f)));
+//
+//            }
+            
+//            waveShapePath.startNewSubPath(ampImage.getX(), ampImage.getHeight()); // Pixel where the path starts
+//            for (auto x = 1.0f; x < (float)ampImage.getWidth(); ++x)
+//            {
+//                waveShapePath.lineTo(x + ampImage.getX(), // Line X pixel position
+//                                     ampImage.getHeight() // Line Y pixel position
+//                                     - x*((float)ampImage.getHeight()/(float)ampImage.getHeight()));
+//            }
+//
             break;
             
         case Reptile:
@@ -175,6 +248,22 @@ void AmpSimAudioProcessorEditor::paint (juce::Graphics& g)
                                                    juce::Colours::black, getInitialWindowSize().getX(),
                                                    getInitialWindowSize().getY(),
                                                    true));
+            
+            waveShapePath.startNewSubPath(ampImage.getX(), ampImage.getHeight()/2.f);
+//            for (auto x = 1.0f; x < (float) getWidth(); ++x)
+//            {
+//                waveShapePath.lineTo(x, (float) getHeight() / 2.0f
+//                                     + ((float)getHeight() - waveshapeThicc)/2.0f
+//                                     * std::sin (x * 160 * 0.0001f));
+//            }
+            for (auto x = 1.0f; x < (float)ampImage.getWidth(); ++x)
+            {
+                waveShapePath.lineTo(x + ampImage.getX(),
+                                     (float) ampImage.getHeight() / 2.0f
+                                     + ((float)ampImage.getHeight() - waveshapeThicc)/2.0f
+                                     * std::sin (x * 80 * 0.0001f));
+            }
+            
             break;
             
         case Geeky:
@@ -216,6 +305,10 @@ void AmpSimAudioProcessorEditor::paint (juce::Graphics& g)
     
     /* Fill in whole background */
     g.fillAll();
+    
+    /* Draw Waveshaping function */
+    g.setColour (juce::Colours::black);
+    g.strokePath (waveShapePath, juce::PathStrokeType (waveshapeThicc));
 }
 
 void AmpSimAudioProcessorEditor::resized()
@@ -272,15 +365,23 @@ void AmpSimAudioProcessorEditor::waveshaperChanged()
     {
             /* Low gain amps */
         case Clean:
-            ampImage.setImage(juce::ImageCache::getFromMemory(BinaryData::capybara_jpeg, BinaryData::capybara_jpegSize));
+//            ampImage.setImage(juce::ImageCache::getFromMemory(BinaryData::capybara_jpeg, BinaryData::capybara_jpegSize));
+//            waveShapePath.startNewSubPath(0, ampImage.getHeight()/2);
+//            for (auto x = 1.0f; x < (float) getWidth(); ++x)
+//            {
+//                waveShapePath.lineTo(x, ampImage.getHeight()/2 + (float) ampImage.getHeight() * 2.0f
+//                                 * std::sin (x * 1000 * 0.0001f));
+//            }
+//            waveShapePath.scaleToFit(ampImage.getX(), ampImage.getY(),
+//                                     ampImage.getWidth(), ampImage.getHeight(), true);
             break;
             
         case Asinine:
-            ampImage.setImage(juce::ImageCache::getFromMemory(BinaryData::capybara2_jpeg, BinaryData::capybara2_jpegSize));
+//            ampImage.setImage(juce::ImageCache::getFromMemory(BinaryData::capybara2_jpeg, BinaryData::capybara2_jpegSize));
             break;
             
         case Reptile:
-            ampImage.setImage(juce::ImageCache::getFromMemory(BinaryData::capybara3_jpeg, BinaryData::capybara3_jpegSize));
+//            ampImage.setImage(juce::ImageCache::getFromMemory(BinaryData::capybara3_jpeg, BinaryData::capybara3_jpegSize));
             break;
             
         case Geeky:
