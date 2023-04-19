@@ -49,6 +49,17 @@
         <FILE id="CxFZfs" name="capybara8.jpeg" compile="0" resource="1" file="Resources/Images/capybara8.jpeg"/>
         <FILE id="HJ5Lsa" name="capybara.jpeg" compile="0" resource="1" file="Resources/Images/capybara.jpeg"/>
       </GROUP>
+      <GROUP id="{21655D46-B9A4-8B2A-5DE7-566301347BF7}" name="WaveshaperImages">
+        <FILE id="sx8Uqb" name="asinine.png" compile="0" resource="1" file="Resources/WaveshaperImages/asinine.png"/>
+        <FILE id="VDirhr" name="circle7.png" compile="0" resource="1" file="Resources/WaveshaperImages/circle7.png"/>
+        <FILE id="bVdrGD" name="clean.png" compile="0" resource="1" file="Resources/WaveshaperImages/clean.png"/>
+        <FILE id="LYZWsE" name="fatman.png" compile="0" resource="1" file="Resources/WaveshaperImages/fatman.png"/>
+        <FILE id="aI0vn0" name="forkintoaster.png" compile="0" resource="1"
+              file="Resources/WaveshaperImages/forkintoaster.png"/>
+        <FILE id="BVdL1I" name="geeky.png" compile="0" resource="1" file="Resources/WaveshaperImages/geeky.png"/>
+        <FILE id="Xr4KcJ" name="reptile.png" compile="0" resource="1" file="Resources/WaveshaperImages/reptile.png"/>
+        <FILE id="k0OvKt" name="smolcronch.png" compile="0" resource="1" file="Resources/WaveshaperImages/smolcronch.png"/>
+      </GROUP>
     </GROUP>
   </MAINGROUP>
   <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1" JUCE_VST3_CAN_REPLACE_VST2="0"/>

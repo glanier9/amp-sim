@@ -359,13 +359,13 @@ void AmpSimAudioProcessor::updateWaveshaper(float shapeSelect)
         case FatMan:        // Polynomail
             leftWaveShape.functionToUse = [](float x){
                 if (x >= -1.0f && x <= 1.0f)
-                    return  (3.0f/2.f)*x - (10.f/20.f)*pow(x, 3.0f);
+                    return  (3.0f/2.f)*x - (1.f/2.f)*pow(x, 3.0f);
                 else
                     return juce::jlimit(-1.0f, 1.0f, x);
             };
             rightWaveShape.functionToUse = [](float x){
                 if (x >= -1.0f && x <= 1.0f)
-                    return  (3.0f/2.f)*x - (10.f/20.f)*pow(x, 3.0f);
+                    return  (3.0f/2.f)*x - (1.f/2.f)*pow(x, 3.0f);
                 else
                     return juce::jlimit(-1.0f, 1.0f, x);
             };
@@ -400,10 +400,10 @@ void AmpSimAudioProcessor::updateWaveshaper(float shapeSelect)
             break;
         case ForkInToaster: // Basic hard clipper
             leftWaveShape.functionToUse = [](float x){
-                return juce::jlimit(-1.0f, 1.0f, x);
+                return juce::jlimit(-0.5f, 0.5f, x);
             };
             rightWaveShape.functionToUse = [](float x){
-                return juce::jlimit(-1.0f, 1.0f, x);
+                return juce::jlimit(-0.5f, 0.5f, x);
             };
             break;
         }
