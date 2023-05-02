@@ -107,8 +107,9 @@ private:
     std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment> convolutionAtt;
     void convolutionChanged();
     
-    /* Image */
+    /* Images */
     juce::ImageComponent ampImage;
+    juce::ImageComponent coolImage;
     juce::Path waveShapePath;
     int imageCheck;
     

@@ -140,8 +140,9 @@ std::vector<juce::Component*> AmpSimAudioProcessorEditor::getComps()
         /* Fx 2 */
         &effect2,
         
-        /* Image */
-        &ampImage
+        /* Images */
+        &ampImage,
+        &coolImage
     };
 }
 
@@ -231,7 +232,7 @@ void AmpSimAudioProcessorEditor::resized()
     auto fxArea2 = windowBounds.removeFromRight(windowBounds.getWidth()/4.f);
     auto comboArea = windowBounds.removeFromBottom(windowBounds.getHeight()/7.f);
     auto singleKnobFxArea = windowBounds.removeFromBottom(windowBounds.getHeight()/3.f);
-    auto imageArea = windowBounds.removeFromLeft(windowBounds.getHeight());
+    auto waveArea = windowBounds.removeFromLeft(windowBounds.getHeight());
     
     /* Amp slider section */
     preGainSlider.setBounds(ampArea.removeFromLeft(ampArea.getWidth()/5.f));
@@ -256,8 +257,11 @@ void AmpSimAudioProcessorEditor::resized()
     /* Effect 2 section */
     effect2.setBounds(fxArea2);
     
-    /* Image */
-    ampImage.setBounds(imageArea);
+    /* Waveshape Image */
+    ampImage.setBounds(waveArea);
+    
+    /* Cool Image */
+    coolImage.setBounds(windowBounds);
 }
 
 //==============================================================================
@@ -275,35 +279,43 @@ void AmpSimAudioProcessorEditor::waveshaperChanged()
             /* Low gain amps */
         case Clean:
             ampImage.setImage(juce::ImageCache::getFromMemory(BinaryData::clean_png, BinaryData::clean_pngSize));
+            coolImage.setImage(juce::ImageCache::getFromMemory(BinaryData::capybara_jpeg, BinaryData::capybara_jpegSize));
             break;
             
         case Asinine:
             ampImage.setImage(juce::ImageCache::getFromMemory(BinaryData::asinine_png, BinaryData::asinine_pngSize));
+            coolImage.setImage(juce::ImageCache::getFromMemory(BinaryData::capybara2_jpeg, BinaryData::capybara2_jpegSize));
             break;
             
         case Reptile:
             ampImage.setImage(juce::ImageCache::getFromMemory(BinaryData::reptile_png, BinaryData::reptile_pngSize));
+            coolImage.setImage(juce::ImageCache::getFromMemory(BinaryData::capybara3_jpeg, BinaryData::capybara3_jpegSize));
             break;
             
         case Geeky:
             ampImage.setImage(juce::ImageCache::getFromMemory(BinaryData::geeky_png, BinaryData::geeky_pngSize));
+            coolImage.setImage(juce::ImageCache::getFromMemory(BinaryData::capybara4_jpeg, BinaryData::capybara4_jpegSize));
             break;
             
         case SmolCronch:
             ampImage.setImage(juce::ImageCache::getFromMemory(BinaryData::smolcronch_png, BinaryData::smolcronch_pngSize));
+            coolImage.setImage(juce::ImageCache::getFromMemory(BinaryData::capybara5_jpeg, BinaryData::capybara5_jpegSize));
             break;
             
             /* High gain amps*/
         case FatMan:
             ampImage.setImage(juce::ImageCache::getFromMemory(BinaryData::fatman_png, BinaryData::fatman_pngSize));
+            coolImage.setImage(juce::ImageCache::getFromMemory(BinaryData::capybara6_jpeg, BinaryData::capybara6_jpegSize));
             break;
             
         case Circle7:
             ampImage.setImage(juce::ImageCache::getFromMemory(BinaryData::circle7_png, BinaryData::circle7_pngSize));
+            coolImage.setImage(juce::ImageCache::getFromMemory(BinaryData::capybara7_jpeg, BinaryData::capybara7_jpegSize));
             break;
             
         case ForkInToaster:
             ampImage.setImage(juce::ImageCache::getFromMemory(BinaryData::forkintoaster_png, BinaryData::forkintoaster_pngSize));
+            coolImage.setImage(juce::ImageCache::getFromMemory(BinaryData::capybara8_jpeg, BinaryData::capybara8_jpegSize));
             break;
     }
     
